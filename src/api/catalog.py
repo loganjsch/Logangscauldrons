@@ -13,7 +13,7 @@ def get_catalog():
 
     # Can return a max of 20 items.
 
-    sql_to_execute = "SELECT gold, red_ml FROM global_inventory"
+    sql_to_execute = "SELECT * FROM global_inventory"
 
     with db.engine.begin() as connection:
         result = connection.execute(sqlalchemy.text(sql_to_execute))
