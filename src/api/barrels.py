@@ -51,10 +51,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
     new_num_ml = first_row.num_red_ml + num_ml_add
 
-    sql_to_execute = """
-        INSERT INTO global_inventory (num_red_ml, gold)
-        VALUES ({new_num_ml}, {my_gold})
-    """
+    sql_to_execute = "UPDATE global_inventory SET num_red_ml = {new_num_ml}, gold = {my_gold} WHERE id = 1;"
 
     with db.engine.begin() as connection:
         result = connection.execute(sqlalchemy.text(sql_to_execute))
