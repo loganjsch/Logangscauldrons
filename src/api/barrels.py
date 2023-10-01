@@ -32,33 +32,36 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     """ """
     print(wholesale_catalog)
 
-    '''
-    num_barrel_buy = 0
-    my_gold = 100
-    for barrel in wholesale_catalog:
-        if my_gold > barrel.price:
-            if first_row.num_red_potion < 10):
-                num_barrel_buy += 1
-                my_gold = my_gold - barrel.price
-    
-    # now set my gold to my gold 
-    # and set num of ml to barrel * ml_per_barrel
-            
-
-    sql_to_execute = "SELECT num_red_potions FROM global_inventory;"
+    sql_to_execute = "SELECT * FROM global_inventory;"
 
     with db.engine.begin() as connection:
         result = connection.execute(sqlalchemy.text(sql_to_execute))
+    
     first_row = result.first()
+    my_gold = first_row.gold
 
-    num_barrel_buy = gold // 100
-    '''
-    # reduce gold by num_barrel_by * 100
-    # increase num_ml by num_barrel_by * ml per barrel
+    num_barrel_buy = 0
+    num_ml_add = 0
+    for barrel in wholesale_catalog:
+        for _ in range(barrel.quantity):
+            if (my_gold > barrel.price) & (first_row.num_red_potion < 10):
+                num_barrel_buy += 1
+                num_ml_add += barrel.ml_per_barrel
+                my_gold = my_gold - barrel.price
+
+    new_num_ml = first_row.num_red_ml + num_ml_add
+
+    sql_to_execute = """
+        INSERT INTO global_inventory (num_red_ml, gold)
+        VALUES ({new_num_ml}, {my_gold})
+    """
+
+    with db.engine.begin() as connection:
+        result = connection.execute(sqlalchemy.text(sql_to_execute))
 
     return [
         {
             "sku": "SMALL_RED_BARREL",
-            "quantity": 1,
+            "quantity": num_barrel_buy,
         }
     ]
