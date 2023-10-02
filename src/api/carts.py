@@ -21,7 +21,8 @@ cartid = 0
 @router.post("/")
 def create_cart(new_cart: NewCart):
     """ """
-    cartid = cartid + 1
+    global cartid
+    cartid += 1
     carts[cartid] = {}
     return cartid
     #return {"cart_id": cartid}
