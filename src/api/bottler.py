@@ -52,8 +52,8 @@ def get_bottle_plan():
    #sql_to_execute = "UPDATE global_inventory SET num_red_potions = {new_bottles}, num_red_ml = {new_ml}"
     #sql_to_execute = "UPDATE global_inventory SET num_red_potions = :bottles, num_red_ml = :ml"
 
-    with db.engine.begin() as connection:
-           connection.execute(sqlalchemy.text(sql_to_execute, bottles=new_bottles, ml=new_ml))
+    #with db.engine.begin() as connection:
+        #   connection.execute(sqlalchemy.text(sql_to_execute, bottles=new_bottles, ml=new_ml))
     
 
 
