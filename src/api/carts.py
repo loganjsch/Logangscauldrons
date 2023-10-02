@@ -12,17 +12,20 @@ router = APIRouter(
 class NewCart(BaseModel):
     customer: str
 
+    #new dictionary here 
+    #cart id val
 
 @router.post("/")
 def create_cart(new_cart: NewCart):
     """ """
+    #cart
     return {"cart_id": 1}
 
 
 @router.get("/{cart_id}")
 def get_cart(cart_id: int):
     """ """
-
+    # not sure
     return {}
 
 
@@ -44,4 +47,5 @@ class CartCheckout(BaseModel):
 def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
 
+    # sql goes here 
     return {"total_potions_bought": 1, "total_gold_paid": 50}
