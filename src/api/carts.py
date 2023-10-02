@@ -29,7 +29,7 @@ def create_cart(new_cart: NewCart):
 @router.get("/{cart_id}")
 def get_cart(cart_id: int):
     """ """
-    return carts[cart_id]
+    return carts[cart_id - 1]
     #return {}
 
 
@@ -40,7 +40,7 @@ class CartItem(BaseModel):
 @router.post("/{cart_id}/items/{item_sku}")
 def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     """ """
-    carts[cart_id][item_sku] = cart_item.quantity
+    carts[cart_id - 1][item_sku] = cart_item.quantity
     return "OK"
 
 
@@ -51,8 +51,8 @@ class CartCheckout(BaseModel):
 def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
     total_potions_bought = 0
-    for item_val in carts[cart_id].values():
-        total_potions_bought += item_val
+    for item_val in carts[cart_id - 1].values():
+        total_potions_bought += int(item_val)
 
     total_gold_paid = 50 * total_potions_bought
     # sql goes here 
