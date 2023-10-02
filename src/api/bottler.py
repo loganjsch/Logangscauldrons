@@ -20,6 +20,12 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory]):
     """ """
     print(potions_delivered)
 
+    for potion in potions_delivered:
+        with db.engine.begin() as connection:
+            connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_red_ml = num_red _ml - " + (potion * 100)))
+        with db.engine.begin() as connection:
+            connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_red_potions = num_red_potions + " + len(potions_delivered)))
+
     return "OK"
 
 # Gets called 4 times a day
@@ -42,20 +48,7 @@ def get_bottle_plan():
 
     first_row = result.first()
 
-
-    #num_bottles = first_row.num_red_ml // 100 
-    num_bottles = 0
-
-    new_bottles = first_row.num_red_potions + num_bottles
-    new_ml = first_row.num_red_ml - (num_bottles * 100)
-
-    #sql_to_execute = "UPDATE global_inventory SET num_red_potions = {new_bottles}, num_red_ml = {new_ml};"
-    sql_to_execute = "UPDATE global_inventory SET num_red_potions = :new_bottles, num_red_ml = :num_red_ml;"
-
-    with db.engine.begin() as connection:
-        connection.execute(sql_to_execute, new_num_ml=new_bottles, num_red_ml=new_ml)
-    
-
+    num_bottles = first_row.num_red_ml // 100 
 
     return [
             {

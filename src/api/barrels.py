@@ -24,6 +24,14 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
     """ """
     print(barrels_delivered)
 
+    for barrel in barrels_delivered:
+        with db.engine.begin() as connection:
+            connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_red_ml = num_red _ml + " + barrel.ml_per_barrel))
+        with db.engine.begin() as connection:
+            connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = gold - " + barrel.price))
+        return "OK"
+    
+
     return "OK"
 
 # Gets called once a day
@@ -41,23 +49,11 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     my_gold = first_row.gold
 
     num_barrel_buy = 0
-    num_ml_add = 0
     for barrel in wholesale_catalog:
         for _ in range(barrel.quantity):
             if (my_gold > barrel.price) & (first_row.num_red_potion < 10):
                 num_barrel_buy += 1
-                num_ml_add += barrel.ml_per_barrel
                 my_gold = my_gold - barrel.price
-
-    new_num_ml = first_row.num_red_ml + num_ml_add
-
-    #sql_to_execute = "UPDATE global_inventory SET num_red_ml = {new_num_ml}, gold = {my_gold};"
-    sql_to_execute = "UPDATE global_inventory SET my_gold = :my_gold, num_red_ml = :num_red_ml;"
-
-
-    with db.engine.begin() as connection:
-    #    connection.execute(sqlalchemy.text(sql_to_execute))
-        connection.execute(sql_to_execute, new_num_ml=new_num_ml, my_gold=my_gold)
 
     return [
         {
