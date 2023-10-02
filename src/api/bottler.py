@@ -48,10 +48,11 @@ def get_bottle_plan():
     new_bottles = first_row.num_red_potions + num_bottles
     new_ml = first_row.num_red_ml - (num_bottles * 100)
 
-    sql_to_execute = "UPDATE global_inventory SET num_red_potions = {new_bottles}, num_red_ml = {new_ml} WHERE id = 1;"
+   #sql_to_execute = "UPDATE global_inventory SET num_red_potions = {new_bottles}, num_red_ml = {new_ml}"
+    sql_to_execute = "UPDATE global_inventory SET num_red_potions = :bottles, num_red_ml = :ml"
 
     with db.engine.begin() as connection:
-           connection.execute(sqlalchemy.text(sql_to_execute))
+           connection.execute(sqlalchemy.text(sql_to_execute, bottles=new_bottles, ml=new_ml))
     
 
 
