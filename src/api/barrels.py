@@ -40,7 +40,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     first_row = result.first()
     my_gold = first_row.gold
 
-    num_barrel_buy = 3
+    num_barrel_buy = 0
     num_ml_add = 0
     for barrel in wholesale_catalog:
         for _ in range(barrel.quantity):
@@ -51,11 +51,13 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
     new_num_ml = first_row.num_red_ml + num_ml_add
 
-    
     #sql_to_execute = "UPDATE global_inventory SET num_red_ml = {new_num_ml}, gold = {my_gold} WHERE id = 1;"
+    sql_to_execute = "UPDATE global_inventory SET gold = :mygold, num_red_ml = :ml;"
 
-    #with db.engine.begin() as connection:
+
+    with db.engine.begin() as connection:
     #    connection.execute(sqlalchemy.text(sql_to_execute))
+        connection.execute(sqlalchemy.text(sql_to_execute, mygold=my_gold, ml=new_num_ml))
 
     return [
         {
