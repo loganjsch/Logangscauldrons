@@ -16,22 +16,20 @@ class NewCart(BaseModel):
     customer: str
 
 carts = []
-cartid = 0
 
 @router.post("/")
 def create_cart(new_cart: NewCart):
     """ """
-    global cartid
-    cartid += 1
-    carts[cartid] = {}
-    return cartid
-    #return {"cart_id": cartid}
+    cartid = len(carts) + 1  # Generate a unique cart id based on the length of the list
+    cart_data = {"cart_id": cartid, "customer": new_cart.customer}
+    carts.append(cart_data)
+    return cart_data
 
 
 @router.get("/{cart_id}")
 def get_cart(cart_id: int):
     """ """
-    return carts[cartid]
+    return carts[cart_id]
     #return {}
 
 
@@ -42,7 +40,7 @@ class CartItem(BaseModel):
 @router.post("/{cart_id}/items/{item_sku}")
 def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     """ """
-    carts[cartid][item_sku] = cart_item.quantity
+    carts[cart_id][item_sku] = cart_item.quantity
     return "OK"
 
 
@@ -53,7 +51,7 @@ class CartCheckout(BaseModel):
 def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
     total_potions_bought = 0
-    for item_val in carts[cartid].values():
+    for item_val in carts[cart_id].values():
         total_potions_bought += item_val
 
     total_gold_paid = 50 * total_potions_bought
