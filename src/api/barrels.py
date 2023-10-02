@@ -40,7 +40,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     first_row = result.first()
     my_gold = first_row.gold
 
-    num_barrel_buy = 0
+    num_barrel_buy = 3
     num_ml_add = 0
     for barrel in wholesale_catalog:
         for _ in range(barrel.quantity):
