@@ -51,7 +51,7 @@ class CartCheckout(BaseModel):
 def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
     total_potions_bought = 0
-    for item_val in carts[cart_id - 1]:
+    for item_val in carts[cart_id - 1].values():
         total_potions_bought += item_val
 
     total_gold_paid = 50 * total_potions_bought
