@@ -38,7 +38,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     """ """
     print(wholesale_catalog)
 
-    sql_to_execute = "SELECT * FROM global_inventory;"
+    sql_to_execute = "SELECT num_red_potions, gold FROM global_inventory"
 
     with db.engine.begin() as connection:
         result = connection.execute(sqlalchemy.text(sql_to_execute))
@@ -48,10 +48,9 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
     num_barrel_buy = 0
     for barrel in wholesale_catalog:
-        for _ in range(barrel.quantity):
-            if (my_gold > barrel.price) & (first_row.num_red_potion < 10):
-                num_barrel_buy += 1
-                my_gold = my_gold - barrel.price
+        if (my_gold > barrel.price) & (first_row.num_red_potion < 10):
+            num_barrel_buy += 1
+            my_gold = my_gold - barrel.price
 
     return [
         {
