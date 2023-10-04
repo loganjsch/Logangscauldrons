@@ -48,7 +48,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
     num_barrel_buy = 0
     for barrel in wholesale_catalog:
-        if (my_gold > barrel.price) & (first_row.num_red_potion < 10):
+        if (my_gold > barrel.price) & (first_row.num_red_potions < 10):
             num_barrel_buy += 1
             my_gold = my_gold - barrel.price
 
