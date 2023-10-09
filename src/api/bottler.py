@@ -41,14 +41,12 @@ def get_bottle_plan():
 
     # Initial logic: bottle all barrels into red potions.
 
-    sql_to_execute = "SELECT * FROM global_inventory;"
+    sql_to_execute = "SELECT num_red_ml FROM global_inventory;"
 
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text(sql_to_execute))
+        result = connection.execute(sqlalchemy.text(sql_to_execute)).first()
 
-    first_row = result.first()
-
-    num_bottles = first_row.num_red_ml // 100 
+    num_bottles = result.num_red_ml // 100 
 
     return [
             {
