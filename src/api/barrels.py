@@ -55,11 +55,11 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     num_blue_barrel_buy = 0
     for barrel in wholesale_catalog:
         if barrel.potion_type == [0, 0, 1, 0]:
-            if (my_gold > barrel.price) & (result.num_blue_barrel_buy < 2):
+            if (my_gold > barrel.price) & (result.num_blue_potions < 2):
                 num_blue_barrel_buy += 1
                 my_gold = my_gold - barrel.price
         elif barrel.potion_type == [0, 1, 0, 0]:
-            if (my_gold > barrel.price) & (result.num_green_barrel_buy < 5):
+            if (my_gold > barrel.price) & (result.num_green_potions < 5):
                 num_blue_barrel_buy += 1
                 my_gold = my_gold - barrel.price
         elif barrel.potion_type == [1, 0, 0, 0]:
