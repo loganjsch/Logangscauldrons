@@ -26,7 +26,12 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
 
     for barrel in barrels_delivered:
         with db.engine.begin() as connection:
-            connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_red_ml = num_red_ml + " + str(barrel.ml_per_barrel)))
+            if barrel.potion_type == [1, 0, 0, 0]:
+                connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_red_ml = num_red_ml + " + str(barrel.ml_per_barrel)))
+            elif barrel.potion_type == [0, 1, 0, 0]:
+                connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_green_ml = num_green_ml + " + str(barrel.ml_per_barrel)))
+            elif barrel.potion_type == [0, 0, 1, 0]:
+                connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_blue_ml = num_blue_ml + " + str(barrel.ml_per_barrel)))
         with db.engine.begin() as connection:
             connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = gold - " + str(barrel.price)))
 
@@ -41,20 +46,38 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     sql_to_execute = "SELECT num_red_potions, num_green_potions, num_blue_potions gold FROM global_inventory"
 
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text(sql_to_execute))
+        result = connection.execute(sqlalchemy.text(sql_to_execute)).first()
     
-    first_row = result.first()
-    my_gold = first_row.gold
+    my_gold = result.gold
 
-    num_barrel_buy = 0
+    num_red_barrel_buy = 0
+    num_green_barrel_buy = 0
+    num_blue_barrel_buy = 0
     for barrel in wholesale_catalog:
-        if (my_gold > barrel.price) & (first_row.num_red_potions < 10):
-            num_barrel_buy += 1
-            my_gold = my_gold - barrel.price
+        if barrel.potion_type == [0, 0, 1, 0]:
+            if (my_gold > barrel.price) & (result.num_blue_barrel_buy < 2):
+                num_blue_barrel_buy += 1
+                my_gold = my_gold - barrel.price
+        elif barrel.potion_type == [0, 1, 0, 0]:
+            if (my_gold > barrel.price) & (result.num_green_barrel_buy < 5):
+                num_blue_barrel_buy += 1
+                my_gold = my_gold - barrel.price
+        elif barrel.potion_type == [1, 0, 0, 0]:
+            if (my_gold > barrel.price) & (result.num_red_potions < 10):
+                num_red_barrel_buy += 1
+                my_gold = my_gold - barrel.price
 
     return [
         {
             "sku": "SMALL_RED_BARREL",
-            "quantity": num_barrel_buy,
+            "quantity": num_red_barrel_buy,
+        },
+        {
+            "sku": "SMALL_GREEN_BARREL",
+            "quantity": num_green_barrel_buy,
+        },
+        {
+            "sku": "SMALL_BLUE_BARREL",
+            "quantity": num_blue_barrel_buy,
         }
     ]
