@@ -52,7 +52,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
     total_potions_bought = 0
     for item_val in carts[cart_id - 1].values():
-        total_potions_bought += item_val
+        total_potions_bought += int(item_val)
 
     total_gold_paid = 50 * total_potions_bought
     # sql goes here 
@@ -65,5 +65,5 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
         connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = gold + " + str(total_gold_paid)))
 
     '''
-    
+
     return {"total_potions_bought": total_potions_bought, "total_gold_paid": total_gold_paid}
