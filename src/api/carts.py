@@ -50,9 +50,36 @@ class CartCheckout(BaseModel):
 @router.post("/{cart_id}/checkout")
 def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
+    """
     total_potions_bought = 0
     for item_val in carts[cart_id - 1].values():
         total_potions_bought += int(item_val)
+    """
+    cart_index = cart_id - 1
+
+    if cart_index < 0 or cart_index >= len(carts):
+        return {"error": "Cart not found"}
+
+    cart = carts[cart_index]
+    total_potions_bought = 0
+    total_gold_paid = 0
+
+    for item_sku, quantity in cart.items():
+        # You may need to define a mapping from item_sku to item price
+        # For example, if item_sku is the SKU of the item, you can fetch its price from a database or a predefined dictionary.
+        # Assuming item_price is a placeholder for the item's price:
+        item_price = get_item_price(item_sku)
+
+        if item_price is not None:
+            total_potions_bought += quantity
+            total_gold_paid += item_price * quantity
+
+    # Now you have the total_potions_bought and total_gold_paid for the cart
+    # You can perform further actions such as updating the database here.
+
+    
+
+    return {"total_potions_bought": total_potions_bought, "total_gold_paid": total_gold_paid}
 
     total_gold_paid = 50 * total_potions_bought
     # sql goes here 
@@ -67,3 +94,9 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
     '''
 
     return {"total_potions_bought": total_potions_bought, "total_gold_paid": total_gold_paid}
+
+def get_item_price(item_sku):
+    # Replace this with your logic to fetch the item's price from a database or a dictionary
+    # Example:
+    item_prices = {"item_sku_1": 10, "item_sku_2": 15, "item_sku_3": 20}
+    return item_prices.get(item_sku, None)
