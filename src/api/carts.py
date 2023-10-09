@@ -41,7 +41,7 @@ class CartItem(BaseModel):
 def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     """ """
     carts[cart_id - 1][item_sku] = cart_item.quantity
-    return "OK"
+    return str(carts[cart_id - 1][item_sku])
 
 
 class CartCheckout(BaseModel):
@@ -93,10 +93,8 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
 
     '''
 
-    return {"total_potions_bought": total_potions_bought, "total_gold_paid": total_gold_paid}
-
 def get_item_price(item_sku):
     # Replace this with your logic to fetch the item's price from a database or a dictionary
     # Example:
-    item_prices = {"small_red_potion": 50, "item_sku_2": 15, "item_sku_3": 20}
+    item_prices = {"RED_POTION_0": 50, "item_sku_2": 15, "item_sku_3": 20}
     return item_prices.get(item_sku, None)
