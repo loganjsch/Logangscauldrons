@@ -57,27 +57,39 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
 
     cart = carts[cart_index]
     total_potions_bought = 0
+    red_potions_bought = 0
+    blue_potions_bought = 0
+    green_potions_bought = 0
     total_gold_paid = 0
 
     for item_sku, quantity in cart.items():
         item_price = get_item_price(item_sku)
 
-        if item_price is not None:
-            total_potions_bought += quantity
+        if item_sku == "RED_POTION_0":
+            red_potions_bought += quantity
+            total_gold_paid += item_price * quantity
+        elif item_sku == "GREEN_POTION_0":
+            green_potions_bought += quantity
+            total_gold_paid += item_price * quantity
+        elif item_sku == "BLUE_POTION_0":
+            blue_potions_bought += quantity
             total_gold_paid += item_price * quantity
 
     # Now you have the total_potions_bought and total_gold_paid for the cart
 
     with db.engine.begin() as connection:
-        connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_red_potions = num_red_potions - " + str(total_potions_bought)))
+        connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_red_potions = num_red_potions - " + str(red_potions_bought)))
+        connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_green_potions = num_green_potions - " + str(green_potions_bought)))
+        connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_blue_potions = num_blue_potions - " + str(blue_potions_bought)))
     with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = gold + " + str(total_gold_paid)))
+
+    total_potions_bought = red_potions_bought + blue_potions_bought + green_potions_bought
 
     return {"total_potions_bought": total_potions_bought, "total_gold_paid": total_gold_paid}
 
 
 def get_item_price(item_sku):
-    # Replace this with your logic to fetch the item's price from a database or a dictionary
-    # Example:
-    item_prices = {"RED_POTION_0": 50, "GREEN_POTION_0": 15, "item_sku_3": 20}
+    
+    item_prices = {"RED_POTION_0": 50, "GREEN_POTION_0": 75, "BLUE_POTION_0": 100}
     return item_prices.get(item_sku, None)
