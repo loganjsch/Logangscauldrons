@@ -18,29 +18,34 @@ def get_catalog():
         result = connection.execute(sqlalchemy.text(sql_to_execute)).first()
 
     catalog = [] 
-
-    return [
-        {
+    if result.num_red_potions > 0:
+        catalog.append(
+            {
             "sku": "RED_POTION_0",
             "name": "red potion",
             "quantity": result.num_red_potions,
             "price": 50,
             "potion_type": [100, 0, 0, 0],
-        },
+        })
+    if result.num_green_potions > 0:
+        catalog.append(
         {
             "sku": "GREEN_POTION_0",
             "name": "green potion",
             "quantity": result.num_green_potions,
             "price": 60,
             "potion_type": [0, 100, 0, 0],
-        },
+        })
+    if result.num_blue_potions > 0:
+        catalog.append(
         {
             "sku": "BLUE_POTION_0",
             "name": "blue potion",
             "quantity": result.num_blue_potions,
             "price": 70,
             "potion_type": [0, 0, 100, 0],
-        }
-    ]
+        })
+
+    return catalog
 
 
