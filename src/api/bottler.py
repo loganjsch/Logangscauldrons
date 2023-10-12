@@ -60,17 +60,23 @@ def get_bottle_plan():
     num_green_bottles = result.num_green_ml // 100
     num_blue_bottles = result.num_blue_ml // 100
 
-    return [
+    plan = []
+
+    if num_red_bottles > 0:
+        plan.append(
             {
                 "potion_type": [100, 0, 0, 0],
                 "quantity": num_red_bottles,
-            },
-            {
+            })
+    if num_green_bottles > 0:
+        plan.append({
                 "potion_type": [0, 100, 0, 0],
                 "quantity": num_green_bottles,
-            },
-                        {
+            })
+    if num_blue_bottles > 0:
+        plan.append({
                 "potion_type": [0, 0, 100, 0],
                 "quantity": num_blue_bottles,
-            }
-        ]
+            })
+
+    return plan
