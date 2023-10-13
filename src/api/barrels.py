@@ -72,17 +72,17 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     if num_red_barrel_buy > 0:
         plan.append(
             {
-                "potion_type": [100, 0, 0, 0],
+                "sku": "SMALL_RED_BARREL",
                 "quantity": num_red_barrel_buy,
             })
     if num_green_barrel_buy > 0:
         plan.append({
-                "potion_type": [0, 100, 0, 0],
+                "sku": "SMALL_GREEN_BARREL",
                 "quantity": num_green_barrel_buy,
             })
     if num_blue_barrel_buy > 0:
         plan.append({
-                "potion_type": [0, 0, 100, 0],
+                "sku": "SMALL_BLUE_BARREL",
                 "quantity": num_blue_barrel_buy,
             })
 
