@@ -12,12 +12,27 @@ def get_catalog():
 
     # Can return a max of 20 items.
 
-    sql_to_execute = "SELECT num_red_potions, num_green_potions, num_blue_potions FROM global_inventory;"
+    sql_to_execute = "SELECT * FROM potions"
 
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text(sql_to_execute)).first()
+        result = connection.execute(sqlalchemy.text(sql_to_execute))
 
-    catalog = [] 
+    catalog = []
+    for row in result:
+        if row['inventory'] > 0:
+            catalog.append(
+                {
+                "sku": row["sku"],
+                "name": row["sku"],
+                "quantity": row["inventory"],
+                "price": row["price"],
+                "potion_type": row["potion_type"],
+            })
+
+    return catalog
+
+    """
+
     if result.num_red_potions > 0:
         catalog.append(
             {
@@ -48,4 +63,4 @@ def get_catalog():
 
     return catalog
 
-
+    """
