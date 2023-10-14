@@ -108,11 +108,12 @@ def get_bottle_plan():
         # or there's 5 of this type (the 5 should be changed but its just to stop christmas
         # taking all the red and green for example)
         for row in potions:
-            potion_dic[row.potion_type] = 0
+            type_tuple = tuple(row.potion_type)
+            potion_dic[type_tuple] = 0
             while ((num_red_ml >= row.potion_type[0]) and (num_green_ml >= row.potion_type[1]) 
             and (num_blue_ml >= row.potion_type[2]) and (num_dark_ml >= row.potion_type[3]) 
-            and ((row.inventory + potion_dic[row.potion_type]) < 6)):
-                potion_dic[row.potion_type] += 1
+            and ((row.inventory + potion_dic[type_tuple]) < 6)):
+                potion_dic[type_tuple] += 1
 
                 # keep local counts up to date
                 num_red_ml = num_red_ml - row.potion_type[0]
@@ -124,7 +125,7 @@ def get_bottle_plan():
             if value > 0:
                 plan.append(
                     {
-                        "potion_type": key,
+                        "potion_type": list(key),
                         "quantity": value,
                     })
 
