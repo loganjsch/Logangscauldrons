@@ -90,11 +90,53 @@ def get_bottle_plan():
     with db.engine.begin() as connection:
         result = connection.execute(sqlalchemy.text(sql_to_execute)).first()
 
+        num_red_ml = result.num_red_ml
+        num_green_ml = result.num_green_ml
+        num_blue_ml = result.num_blue_ml
+        num_dark_ml = result.num_dark_ml
+
+        potions = connection.execute(sqlalchemy.text("SELECT * from potions ORDER BY id ASC"))
+
+        plan = []
+
+        ## i do not know what the logic should be here
+
+        # dictionary to keep track of how many of each potion for the plan
+        potion_dic = {}
+
+        # This basically says go through the id order, and buy as much until i cant afford it anymore 
+        # or there's 5 of this type (the 5 should be changed but its just to stop christmas
+        # taking all the red and green for example)
+        for row in potions:
+            potion_dic[row.potion_type] = 0
+            while ((num_red_ml >= row.potion_type[0]) and (num_green_ml >= row.potion_type[1]) 
+            and (num_blue_ml >= row.potion_type[2]) and (num_dark_ml >= row.potion_type[3]) 
+            and ((row.inventory + potion_dic[row.potion_type]) < 6)):
+                potion_dic[row.potion_type] += 1
+
+                # keep local counts up to date
+                num_red_ml = num_red_ml - row.potion_type[0]
+                num_green_ml = num_green_ml - row.potion_type[1]
+                num_blue_ml = num_blue_ml - row.potion_type[2]
+                num_dark_ml = num_dark_ml - row.potion_type[3]
+
+        for key, value in potion_dic.items():
+            if value > 0:
+                plan.append(
+                    {
+                        "potion_type": key,
+                        "quantity": value,
+                    })
+
+        return plan
+
+
+    """
+
     num_red_bottles = result.num_red_ml // 100 
     num_green_bottles = result.num_green_ml // 100
     num_blue_bottles = result.num_blue_ml // 100
 
-    plan = []
 
     if num_red_bottles > 0:
         plan.append(
@@ -114,3 +156,5 @@ def get_bottle_plan():
             })
 
     return plan
+
+    """
