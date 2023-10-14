@@ -18,7 +18,7 @@ class PotionInventory(BaseModel):
 @router.post("/deliver")
 def post_deliver_bottles(potions_delivered: list[PotionInventory]):
     """ """
-    with db.begin() as connection:
+    with db.engine.begin() as connection:
         print(potions_delivered)
 
         additional_potions = sum(potion.quantity for potion in potions_delivered)
