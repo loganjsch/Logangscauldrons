@@ -53,9 +53,8 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
                 num_blue_ml = num_blue_ml + :num_blue_ml,
                 num_dark_ml = num_dark_ml + :num_dark_ml,
                 gold = gold - :gold_paid
-                """,
+                """),
                 [{"num_red_ml": num_red_ml,"num_green_ml": num_green_ml,"num_blue_ml": num_blue_ml,"num_dark_ml": num_dark_ml,"gold_paid": gold_paid}])
-        )
 
     return "OK"
 
