@@ -91,5 +91,5 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
 
 def get_item_price(item_sku):
     
-    item_prices = {"RED_POTION_0": 50, "GREEN_POTION_0": 75, "BLUE_POTION_0": 100}
+    item_prices = {"RED_POTION_0": 50, "GREEN_POTION_0": 60, "BLUE_POTION_0": 70}
     return item_prices.get(item_sku, None)
