@@ -19,14 +19,14 @@ def get_catalog():
 
     catalog = []
     for row in result:
-        if row['inventory'] > 0:
+        if row.inventory > 0:
             catalog.append(
                 {
-                "sku": row["sku"],
-                "name": row["sku"],
-                "quantity": row["inventory"],
-                "price": row["price"],
-                "potion_type": row["potion_type"],
+                "sku": row.sku,
+                "name": row.sku,
+                "quantity": row.inventory,
+                "price": row.cost,
+                "potion_type": row.potion_type,
             })
 
     return catalog
