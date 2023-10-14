@@ -44,7 +44,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
     print(f"gold_paid: {gold_paid} num_red_ml: {num_red_ml} num_green_ml: {num_green_ml} num_dark_ml: {num_dark_ml}")
 
     with db.engine.begin() as connection:
-        connection.exectue(
+        connection.execute(
             sqlalchemy.text(
                 """
                 UPDATE global_inventory SET
