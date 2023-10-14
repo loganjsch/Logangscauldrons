@@ -34,7 +34,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory]):
                                 SET inventory = inventory + :additional_potions
                                 WHERE potion_type = :potion_type
                                 """),
-                [{"additonal_potions": potion_delivered.quantity,
+                [{"additional_potions": potion_delivered.quantity,
                   "potion_type": potion_delivered.potion_type}]
             )
         
