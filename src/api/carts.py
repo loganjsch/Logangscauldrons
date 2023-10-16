@@ -109,7 +109,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
                             JOIN potions ON potions.id = cart_items.potion_id
                             WHERE cart_id = :cart_id
                             """),
-                            [{"cart_id": cart_id}]).scaler_one()
+                            [{"cart_id": cart_id}]).scalar_one()
 
 
         total_gold = connection.execute(
@@ -118,7 +118,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
                             FROM cart_items
                             JOIN potions ON potions.id = cart_items.potion_id
                             WHERE cart_id = :cart_id"""),
-                            [{"cart_id": cart_id}]).scaler_one()
+                            [{"cart_id": cart_id}]).scalar_one()
 
         connection.execute(
             sqlalchemy.text("""
