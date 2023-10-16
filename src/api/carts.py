@@ -31,13 +31,14 @@ def create_cart(new_cart: NewCart):
                                             "payment": 0}]
         )
 
+
+        return "OK"
+
+        """
         sql_to_execute = "SELECT * FROM carts;"
         result = connection.execute(sqlalchemy.text(sql_to_execute)).first()
 
         cart = {"cart_id": str(result.id)}
-        return cart
-
-        """
 
         sql_to_execute = "SELECT num_red_ml, num_green_ml, num_blue_ml, num_dark_ml FROM global_inventory;"
         cartid = len(carts) + 1  # Generate a unique cart id based on the length of the list
@@ -47,7 +48,7 @@ def create_cart(new_cart: NewCart):
 
         """
 
-
+# this one needs to change
 @router.get("/{cart_id}")
 def get_cart(cart_id: int):
     """ """
@@ -66,11 +67,21 @@ class CartItem(BaseModel):
 def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     """ """
 
+    with db.engine.begin() as connection:
     # set the cart_item quantity to to whetver, set cart_id to whatever, set item_sku to whaterver 
+        connection.execute(
+                    sqlalchemy.text(""" 
+                                    UPDATE cart_items SET 
+                                    quantity = quantity + :quantity,
+                                    cart_id = :cart_id
+                                    WHERE item_sku = :item_sku
+                                    """),
+                    [{"quantity": cart_item.quantity,
+                    "cart_id": cart_id,
+                    "item_sku": item_sku}]
+                )
 
-
-    carts[cart_id - 1][item_sku] = cart_item.quantity
-    return str(carts[cart_id - 1][item_sku])
+    return "OK"
 
 class CartCheckout(BaseModel):
     payment: str
