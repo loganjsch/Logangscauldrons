@@ -74,11 +74,11 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
                                     UPDATE cart_items SET 
                                     quantity = quantity + :quantity,
                                     cart_id = :cart_id
-                                    WHERE item_sku = :item_sku
+                                    WHERE sku = :sku
                                     """),
                     [{"quantity": cart_item.quantity,
                     "cart_id": cart_id,
-                    "item_sku": item_sku}]
+                    "sku": item_sku}]
                 )
 
     return "OK"
