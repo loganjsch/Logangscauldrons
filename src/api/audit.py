@@ -15,16 +15,21 @@ router = APIRouter(
 def get_inventory():
     """ """
 
-    sql_to_execute = "SELECT num_red_potions, gold, num_red_ml FROM global_inventory"
+    sql_to_execute = "SELECT * FROM global_inventory"
 
     with db.engine.begin() as connection:
         result = connection.execute(sqlalchemy.text(sql_to_execute)).first()
+        total_potions = connection.execute(
+                            sqlalchemy.text("""
+                                            SELECT SUM(inventory) AS total_quantity
+                                            FROM potions"""
+                                            ))
 
-    num_of_potions = result.num_red_potions
-    ml_in_barrles = result.num_red_ml
+    ml_in_barrles = result.num_red_ml + result.num_blue_ml + result.num_green_ml + result.num_dark_ml
     gold = result.gold
 
-    return {"number_of_potions": num_of_potions, "ml_in_barrels": ml_in_barrles, "gold": gold}
+
+    return {"number_of_potions": total_potions, "ml_in_barrels": ml_in_barrles, "gold": gold}
 
 class Result(BaseModel):
     gold_match: bool
