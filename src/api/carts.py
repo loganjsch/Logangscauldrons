@@ -25,7 +25,7 @@ def create_cart(new_cart: NewCart):
     with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text("""
                                            INSERT INTO carts (customer, payment)
-                                           VALUES (customer, payment);
+                                           VALUES (:customer, :payment);
                                            """),
                                            [{"customer": new_cart.customer,
                                             "payment": 0}]
@@ -36,7 +36,7 @@ def create_cart(new_cart: NewCart):
 
         cart = {"cart_id": str(result.id)}
         return cart
-        
+
         """
 
         sql_to_execute = "SELECT num_red_ml, num_green_ml, num_blue_ml, num_dark_ml FROM global_inventory;"
