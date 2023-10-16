@@ -75,7 +75,7 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
         connection.execute(
             sqlalchemy.text("""
                             INSERT INTO cart_items (sku, cart_id, quantity, potion_id)
-                            SELECT :sku, :cart_id, :quantity, p.potion_id
+                            SELECT :sku, :cart_id, :quantity, p.id
                             FROM potions p
                             WHERE p.sku = :sku;
                             """),
