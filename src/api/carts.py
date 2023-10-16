@@ -24,11 +24,10 @@ def create_cart(new_cart: NewCart):
 
     with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text("""
-                                           INSERT INTO carts (customer, payment)
-                                           VALUES (:customer, :payment);
+                                           INSERT INTO carts (customer)
+                                           VALUES (:customer);
                                            """),
-                                           [{"customer": new_cart.customer,
-                                            "payment": 0}]
+                                           [{"customer": new_cart.customer}]
         )
 
 
@@ -69,9 +68,6 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
 
     with db.engine.begin() as connection:
     # set the cart_item quantity to to whetver, set cart_id to whatever, set item_sku to whaterver 
-
-
-        
         connection.execute(
             sqlalchemy.text("""
                             INSERT INTO cart_items (sku, cart_id, quantity, potion_id)
@@ -81,7 +77,6 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
                             """),
                             {"sku": item_sku, "cart_id": cart_id, "quantity": cart_item.quantity}
         )
-
 
     return "OK"
 
@@ -105,7 +100,46 @@ class CartCheckout(BaseModel):
 @router.post("/{cart_id}/checkout")
 def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
+    
+    with db.engine.begin() as connection:
+        total_potions = connection.execute(
+            sqlalchemy.text("""
+                            SELECT SUM(quantity) AS total_potions
+                            FROM cart_items
+                            JOIN potions ON potions.id = cart_items.potion_id
+                            WHERE cart_id = :cart_id
+                            """),
+                            [{"cart_id": cart_id}]).scaler_one()
+
+
+        total_gold = connection.execute(
+            sqlalchemy.text("""
+                            SELECT SUM(quantity*price) AS total_gold
+                            FROM cart_items
+                            JOIN potions ON potions.id = cart_items.potion_id
+                            WHERE cart_id = :cart_id"""),
+                            [{"cart_id": cart_id}]).scaler_one()
+
+        connection.execute(
+            sqlalchemy.text("""
+                            UPDATE potions
+                            SET inventory = inbentoru - cart_items.quantity 
+                            WHERE potions.id = cart_items.potion_id and cart_items.cart_id = :cart_id
+                            UPDATE globals
+                            SET gold = gold + :total_gold
+                        """))
+
+    return {"total_potions_bought": total_potions, "total_gold_paid": total_gold}
+
+
+
+
+"""
     cart_index = cart_id - 1
+
+
+    # given cart_id, total up all the potions, and gold in the cart 
+    # update, potions db and global inventories with the new gold 
 
     if cart_index < 0 or cart_index >= len(carts):
         return {"error": "Cart not found"}
@@ -143,8 +177,9 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
 
     return {"total_potions_bought": total_potions_bought, "total_gold_paid": total_gold_paid}
 
-
 def get_item_price(item_sku):
     
     item_prices = {"RED_POTION_0": 50, "GREEN_POTION_0": 60, "BLUE_POTION_0": 70}
     return item_prices.get(item_sku, None)
+
+"""
