@@ -69,19 +69,35 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
 
     with db.engine.begin() as connection:
     # set the cart_item quantity to to whetver, set cart_id to whatever, set item_sku to whaterver 
+
+
+        
         connection.execute(
-                    sqlalchemy.text(""" 
+            sqlalchemy.text("""
+                            INSERT INTO cart_items (sku, cart_id, quantity, potion_id)
+                            SELECT :sku, :cart_id, :quantity, p.potion_id
+                            FROM potions p
+                            WHERE p.sku = :sku;
+                            """),
+                            {"sku": item_sku, "cart_id": cart_id, "quantity": cart_item.quantity}
+        )
+
+
+    return "OK"
+
+    """
+            connection.execute(
+                    sqlalchemy.text(" 
                                     UPDATE cart_items SET 
                                     quantity = quantity + :quantity,
                                     cart_id = :cart_id
                                     WHERE sku = :sku
-                                    """),
+                                    "),
                     [{"quantity": cart_item.quantity,
                     "cart_id": cart_id,
                     "sku": item_sku}]
                 )
-
-    return "OK"
+    """
 
 class CartCheckout(BaseModel):
     payment: str
