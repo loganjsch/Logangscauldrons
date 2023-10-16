@@ -127,7 +127,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
                             WHERE potions.id = cart_items.potion_id and cart_items.cart_id = :cart_id
                             UPDATE globals
                             SET gold = gold + :total_gold
-                        """))
+                            """), [{"total_gold": total_gold}])
 
     return {"total_potions_bought": total_potions, "total_gold_paid": total_gold}
 
