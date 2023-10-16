@@ -131,7 +131,6 @@ def get_bottle_plan():
 
         return plan
 
-
     """
 
     num_red_bottles = result.num_red_ml // 100 

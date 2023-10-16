@@ -11,7 +11,6 @@ router = APIRouter(
     dependencies=[Depends(auth.get_api_key)],
 )
 
-
 class NewCart(BaseModel):
     customer: str
 
@@ -20,15 +19,41 @@ carts = []
 @router.post("/")
 def create_cart(new_cart: NewCart):
     """ """
-    cartid = len(carts) + 1  # Generate a unique cart id based on the length of the list
-    cart_data = {"cart_id": cartid, "customer": new_cart.customer}
-    carts.append(cart_data)
-    return cart_data
+
+    # new cart into table with "new_cart.customer" as customer
+
+    with db.engine.begin() as connection:
+        connection.execute(sqlalchemy.text("""
+                                           INSERT INTO carts (customer, payment)
+                                           VALUES (customer, payment);
+                                           """),
+                                           [{"customer": new_cart.customer,
+                                            "payment": 0}]
+        )
+
+        sql_to_execute = "SELECT * FROM carts;"
+        result = connection.execute(sqlalchemy.text(sql_to_execute)).first()
+
+        cart = {"cart_id": str(result.id)}
+        return cart
+        
+        """
+
+        sql_to_execute = "SELECT num_red_ml, num_green_ml, num_blue_ml, num_dark_ml FROM global_inventory;"
+        cartid = len(carts) + 1  # Generate a unique cart id based on the length of the list
+        cart_data = {"cart_id": cartid, "customer": new_cart.customer}
+        carts.append(cart_data)
+        return cart_data
+
+        """
 
 
 @router.get("/{cart_id}")
 def get_cart(cart_id: int):
     """ """
+
+    # return a cart with all the stuff 
+
     return carts[cart_id - 1]
     #return {}
 
@@ -40,9 +65,12 @@ class CartItem(BaseModel):
 @router.post("/{cart_id}/items/{item_sku}")
 def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     """ """
+
+    # set the cart_item quantity to to whetver, set cart_id to whatever, set item_sku to whaterver 
+
+
     carts[cart_id - 1][item_sku] = cart_item.quantity
     return str(carts[cart_id - 1][item_sku])
-
 
 class CartCheckout(BaseModel):
     payment: str
