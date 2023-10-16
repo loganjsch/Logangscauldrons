@@ -114,16 +114,17 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
 
         total_gold = connection.execute(
             sqlalchemy.text("""
-                            SELECT SUM(quantity*price) AS total_gold
+                            SELECT SUM(quantity*cost) AS total_gold
                             FROM cart_items
                             JOIN potions ON potions.id = cart_items.potion_id
-                            WHERE cart_id = :cart_id"""),
+                            WHERE cart_id = :cart_id
+                            """),
                             [{"cart_id": cart_id}]).scalar_one()
 
         connection.execute(
             sqlalchemy.text("""
                             UPDATE potions
-                            SET inventory = inbentoru - cart_items.quantity 
+                            SET inventory = inventory - cart_items.quantity 
                             WHERE potions.id = cart_items.potion_id and cart_items.cart_id = :cart_id
                             UPDATE globals
                             SET gold = gold + :total_gold
