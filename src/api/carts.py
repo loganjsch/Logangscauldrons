@@ -126,7 +126,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
                             UPDATE potions
                             SET inventory = inventory - cart_items.quantity 
                             WHERE potions.id = cart_items.potion_id and cart_items.cart_id = :cart_id
-                            UPDATE globals
+                            UPDATE global_inventory
                             SET gold = gold + :total_gold
                             """), [{"total_gold": total_gold, "cart_id": cart_id}])
 
