@@ -24,9 +24,7 @@ def get_inventory():
                                             SELECT SUM(inventory)
                                             FROM potions
                                             """
-                                            ))
-
-    total_potions = sqlalchemy.func.sum(total_potions.first()[0])
+                                            )).scalar_one()
 
     ml_in_barrles = result.num_red_ml + result.num_blue_ml + result.num_green_ml + result.num_dark_ml
     gold = result.gold
