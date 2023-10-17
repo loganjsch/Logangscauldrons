@@ -23,16 +23,15 @@ def create_cart(new_cart: NewCart):
     # new cart into table with "new_cart.customer" as customer
 
     with db.engine.begin() as connection:
-        connection.execute(sqlalchemy.text("""
+        id = connection.execute(sqlalchemy.text("""
                                            INSERT INTO carts (customer)
-                                           VALUES (:customer);
+                                           VALUES (:customer)
+                                           RETURNING id;
                                            """),
                                            [{"customer": new_cart.customer}]
         )
-
-
-        return "OK"
-
+    
+        return {"cart_id": id}
         """
         sql_to_execute = "SELECT * FROM carts;"
         result = connection.execute(sqlalchemy.text(sql_to_execute)).first()
