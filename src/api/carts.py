@@ -29,7 +29,7 @@ def create_cart(new_cart: NewCart):
                                            RETURNING id;
                                            """),
                                            [{"customer": new_cart.customer}]
-        )
+        ).scalar_one()
     
         return {"cart_id": id}
         """
