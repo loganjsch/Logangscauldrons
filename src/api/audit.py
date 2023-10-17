@@ -21,8 +21,9 @@ def get_inventory():
         result = connection.execute(sqlalchemy.text(sql_to_execute)).first()
         total_potions = connection.execute(
                             sqlalchemy.text("""
-                                            SELECT SUM(inventory) AS total_quantity
-                                            FROM potions"""
+                                            SELECT SUM(inventory)
+                                            FROM potions
+                                            """
                                             ))
 
     ml_in_barrles = result.num_red_ml + result.num_blue_ml + result.num_green_ml + result.num_dark_ml
