@@ -51,10 +51,9 @@ def create_cart(new_cart: NewCart):
 def get_cart(cart_id: int):
     """ """
 
-    # return a cart with all the stuff 
+    # honestly idk what this is supposed to do
 
-    return carts[cart_id - 1]
-    #return {}
+    return {}
 
 
 class CartItem(BaseModel):
