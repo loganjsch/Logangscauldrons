@@ -26,11 +26,13 @@ def get_inventory():
                                             """
                                             ))
 
+    total_potions = sqlalchemy.func.sum(total_potions.first()[0])
+
     ml_in_barrles = result.num_red_ml + result.num_blue_ml + result.num_green_ml + result.num_dark_ml
     gold = result.gold
 
-
     return {"number_of_potions": total_potions, "ml_in_barrels": ml_in_barrles, "gold": gold}
+
 
 class Result(BaseModel):
     gold_match: bool
