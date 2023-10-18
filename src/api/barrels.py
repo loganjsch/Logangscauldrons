@@ -86,30 +86,22 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         result = connection.execute(sqlalchemy.text(sql_to_execute)).first()
     
     my_gold = result.gold
-
-    """
-    num_red_barrel_buy = 0
-    num_green_barrel_buy = 0
-    num_blue_barrel_buy = 0
-    num_dark_barrel_buy = 0
-    """
-
     barrel_dict = {}
 
     for barrel in wholesale_catalog:
         barrel_dict[barrel.sku] = 0
         # going to need to change the 1000 number 
-        if barrel.potion_type == [0, 0, 0, 1]:
-            if (my_gold > barrel.price) & (result.num_red_ml < 1000):
+        if barrel.potion_type == [0, 1, 0, 0]:
+            if (my_gold > barrel.price) & (result.num_green_ml < 1000):
                 #num_dark_barrel_buy += 1
                 barrel_dict[barrel.sku] += 1
                 my_gold = my_gold - barrel.price
-        if barrel.potion_type == [0, 0, 1, 0]:
-            if (my_gold > barrel.price) & (result.num_green_ml < 1000):
+        if barrel.potion_type == [1, 0, 0, 0]:
+            if (my_gold > barrel.price) & (result.num_red_ml < 1000):
                 #num_blue_barrel_buy += 1
                 barrel_dict[barrel.sku] += 1
                 my_gold = my_gold - barrel.price
-        if barrel.potion_type == [0, 1, 0, 0]:
+        if barrel.potion_type == [0, 0, 1, 0]:
             if (my_gold > barrel.price) & (result.num_blue_ml < 1000):
                 #num_blue_barrel_buy += 1
                 barrel_dict[barrel.sku] += 1
