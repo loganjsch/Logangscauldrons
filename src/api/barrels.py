@@ -32,14 +32,17 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
 
     for barrel_delivered in barrels_delivered:
         gold_paid += barrel_delivered.price * barrel_delivered.quantity
+        if barrel_delivered.potion_type == [0,0,0,1]:
+            num_dark_ml += barrel_delivered.ml_per_barrel * barrel_delivered.quantity
+        if barrel_delivered.potion_type == [0,1,0,0]:
+            num_green_ml += barrel_delivered.ml_per_barrel * barrel_delivered.quantity
+        if barrel_delivered.potion_type == [0,0,1,0]:
+            num_blue_ml += barrel_delivered.ml_per_barrel * barrel_delivered.quantity
         if barrel_delivered.potion_type == [1,0,0,0]:
             num_red_ml += barrel_delivered.ml_per_barrel * barrel_delivered.quantity
-        elif barrel_delivered.potion_type == [0,1,0,0]:
-            num_green_ml += barrel_delivered.ml_per_barrel * barrel_delivered.quantity
-        elif barrel_delivered.potion_type == [0,0,1,0]:
-            num_blue_ml += barrel_delivered.ml_per_barrel * barrel_delivered.quantity
-        elif barrel_delivered.potion_type == [0,0,0,1]:
-            num_dark_ml += barrel_delivered.ml_per_barrel * barrel_delivered.quantity
+        
+        
+        
 
     print(f"gold_paid: {gold_paid} num_red_ml: {num_red_ml} num_green_ml: {num_green_ml} num_dark_ml: {num_dark_ml}")
 
