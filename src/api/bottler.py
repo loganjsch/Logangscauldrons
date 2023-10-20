@@ -112,7 +112,7 @@ def get_bottle_plan():
             potion_dic[type_tuple] = 0
             while ((num_red_ml >= row.potion_type[0]) and (num_green_ml >= row.potion_type[1]) 
             and (num_blue_ml >= row.potion_type[2]) and (num_dark_ml >= row.potion_type[3]) 
-            and ((row.inventory + potion_dic[type_tuple]) < 75)):
+            and ((row.inventory + potion_dic[type_tuple]) < 10)):
                 potion_dic[type_tuple] += 1
 
                 # keep local counts up to date
