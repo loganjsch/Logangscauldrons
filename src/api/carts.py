@@ -32,21 +32,7 @@ def create_cart(new_cart: NewCart):
         ).scalar_one()
     
         return {"cart_id": id}
-        """
-        sql_to_execute = "SELECT * FROM carts;"
-        result = connection.execute(sqlalchemy.text(sql_to_execute)).first()
 
-        cart = {"cart_id": str(result.id)}
-
-        sql_to_execute = "SELECT num_red_ml, num_green_ml, num_blue_ml, num_dark_ml FROM global_inventory;"
-        cartid = len(carts) + 1  # Generate a unique cart id based on the length of the list
-        cart_data = {"cart_id": cartid, "customer": new_cart.customer}
-        carts.append(cart_data)
-        return cart_data
-
-        """
-
-# this one needs to change
 @router.get("/{cart_id}")
 def get_cart(cart_id: int):
     """ """
@@ -78,31 +64,26 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
 
     return "OK"
 
-    """
-            connection.execute(
-                    sqlalchemy.text(" 
-                                    UPDATE cart_items SET 
-                                    quantity = quantity + :quantity,
-                                    cart_id = :cart_id
-                                    WHERE sku = :sku
-                                    "),
-                    [{"quantity": cart_item.quantity,
-                    "cart_id": cart_id,
-                    "sku": item_sku}]
-                )
-    """
-
 class CartCheckout(BaseModel):
     payment: str
 
 @router.post("/{cart_id}/checkout")
 def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
+
+    total_potions = 0
+    num_red_potions = 0
+    num_green_potions = 0
+    num_blue_potions = 0
+    num_dark_potions = 0
+    num_purple_potions = 0
+    num_christmas_potions = 0
+    num_cyan_potions = 0
     
     with db.engine.begin() as connection:
-        total_potions = connection.execute(
+        cart = connection.execute(
             sqlalchemy.text("""
-                            SELECT SUM(quantity) AS total_potions
+                            SELECT *
                             FROM cart_items
                             JOIN potions ON potions.id = cart_items.potion_id
                             WHERE cart_id = :cart_id
@@ -119,8 +100,45 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
                             """),
                             [{"cart_id": cart_id}]).scalar_one()
 
+        for cart_item in cart:
+            match cart_item.potion_id:
+                case 1:
+                    num_christmas_potions -= cart_item.quantity
+                case 2:
+                    num_red_potions -= cart_item.quantity
+                case 3:
+                    num_blue_potions -= cart_item.quantity
+                case 4:
+                    num_dark_potions -= cart_item.quantity
+                case 5:
+                    num_green_potions -= cart_item.quantity
+                case 6:
+                    num_purple_potions -= cart_item.quantity
+                case 7:
+                    num_cyan_potions -= cart_item.quantity
+
+        potion_ledger = connection.execute(
+                sqlalchemy.text("""
+                                INSERT INTO potions_ledger (red_potions, green_potions, blue_potions, dark_potions, purple_potions, christmas_potions, cyan_potions)
+                                VALUES (:red_potions,:green_potions,:blue_potions,:dark_potions,:purple_potions,:christmas_potions,:cyan_potions)
+                                RETURNING id
+                                """),
+                                {"red_potions": num_red_potions,"green_potions": num_green_potions,"blue_potions": num_blue_potions,"dark_potions": num_dark_potions,"purple_potions": num_purple_potions,"christmas_potions": num_christmas_potions,"cyan_potions": num_cyan_potions}
+            )
+        
         connection.execute(
             sqlalchemy.text("""
+                            INSERT INTO gold_ledger (gold_change, potions_ledger_id)
+                            VALUES (:gold_change, :potions_ledger_id)
+                            """),
+                           [{"gold_change": total_gold, "potions_ledger_id": potion_ledger}]
+        )
+
+        return {"total_potions_bought": total_potions, "total_gold_paid": total_gold}
+
+        """
+        connection.execute(
+            sqlalchemy.text("
                             UPDATE potions
                             SET inventory = inventory - cart_items.quantity 
                             FROM cart_items
@@ -128,9 +146,10 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
 
                             UPDATE global_inventory
                             SET gold = gold + :total_gold
-                            """), [{"total_gold": total_gold, "cart_id": cart_id}])
+                            "), [{"total_gold": total_gold, "cart_id": cart_id}])
+        """
 
-    return {"total_potions_bought": total_potions, "total_gold_paid": total_gold}
+
 
 
 
