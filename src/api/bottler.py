@@ -74,7 +74,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory]):
                                 INSERT INTO potions_ledger (:potion_name, barrel_ledger_id)
                                 VALUES (1, :barrel_ledger_id)
                                 """),
-                                {"potion_name": potion_delivered.potion_type,  "barrel_ledger_id": barrel_ledger_id}
+                                {"potion_name": str(potion_delivered.potion_type),  "barrel_ledger_id": barrel_ledger_id}
             )
 
         return "OK"
