@@ -106,34 +106,51 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     """ """
     print(wholesale_catalog)
 
-    sql_to_execute = "SELECT * FROM global_inventory"
+    gold_sql_to_execute ="""
+                        SELECT SUM(gold_change) as total_gold
+                        FROM gold_ledger;
+                        """
+
+    ml_sql_to_execute ="""
+                        SELECT SUM(red_ml_change) as total_red_ml, 
+                            SUM(green_ml_change) as total_green_ml, 
+                            SUM(blue_ml_change) as total_blue_ml, 
+                            SUM(dark_ml_change) as total_dark_ml
+                        FROM barrel_ledger;
+                        """
 
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text(sql_to_execute)).first()
+        result = connection.execute(sqlalchemy.text(ml_sql_to_execute)).first()
+
+        total_red_ml = result.total_red_ml
+        total_green_ml = result.total_green_ml
+        total_blue_ml = result.total_blue_ml
+        total_dark_ml = result.total_dark_ml
+
+        my_gold = connection.execute(sqlalchemy.text(gold_sql_to_execute)).scalar_one()
     
-    my_gold = result.gold
     barrel_dict = {}
 
     for barrel in wholesale_catalog:
         barrel_dict[barrel.sku] = 0
         # going to need to change the 1000 number 
         if barrel.potion_type == [0, 1, 0, 0]:
-            if (my_gold > barrel.price) & (result.num_green_ml < 1000):
+            if (my_gold > barrel.price) & (total_green_ml < 1000):
                 #num_dark_barrel_buy += 1
                 barrel_dict[barrel.sku] += 1
                 my_gold = my_gold - barrel.price
         if barrel.potion_type == [1, 0, 0, 0]:
-            if (my_gold > barrel.price) & (result.num_red_ml < 1000):
+            if (my_gold > barrel.price) & (total_red_ml < 1000):
                 #num_blue_barrel_buy += 1
                 barrel_dict[barrel.sku] += 1
                 my_gold = my_gold - barrel.price
         if barrel.potion_type == [0, 0, 1, 0]:
-            if (my_gold > barrel.price) & (result.num_blue_ml < 1000):
+            if (my_gold > barrel.price) & (total_blue_ml < 1000):
                 #num_blue_barrel_buy += 1
                 barrel_dict[barrel.sku] += 1
                 my_gold = my_gold - barrel.price
         if barrel.potion_type == [1, 0, 0, 0]:
-            if (my_gold > barrel.price) & (result.num_dark_ml < 1000):
+            if (my_gold > barrel.price) & (total_dark_ml < 1000):
                 #num_dark_barrel_buy += 1
                 barrel_dict[barrel.sku] += 1
                 my_gold = my_gold - barrel.price
@@ -147,7 +164,6 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                         "sku": key,
                         "quantity": value,
                     })
-
 
     return plan
 

@@ -15,21 +15,43 @@ router = APIRouter(
 def get_inventory():
     """ """
 
-    sql_to_execute = "SELECT * FROM global_inventory"
+    gold_sql_to_execute ="""
+                        SELECT SUM(gold_change) as total_gold
+                        FROM gold_ledger;
+                        """
+
+    ml_sql_to_execute ="""
+                        SELECT SUM(red_ml_change) as total_red_ml, 
+                            SUM(green_ml_change) as total_green_ml, 
+                            SUM(blue_ml_change) as total_blue_ml, 
+                            SUM(dark_ml_change) as total_dark_ml
+                        FROM barrel_ledger;
+                        """
+
+    potions_sql_to_execute="""
+                            SELECT SUM(red_potions) as total_red, 
+                                SUM(green_potions) as total_green, 
+                                SUM(blue_potions) as total_blue, 
+                                SUM(dark_potions) as total_dark,
+                                SUM(christmas_potions) as total_christmas, 
+                                SUM(purple_potions) as total_purple, 
+                                SUM(cyan_potions) as total_cyan
+                            FROM potions_ledger;
+                            """
 
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text(sql_to_execute)).first()
-        total_potions = connection.execute(
-                            sqlalchemy.text("""
-                                            SELECT SUM(inventory)
-                                            FROM potions
-                                            """
-                                            )).scalar_one()
+        result = connection.execute(sqlalchemy.text(ml_sql_to_execute)).first()
 
-    ml_in_barrles = result.num_red_ml + result.num_blue_ml + result.num_green_ml + result.num_dark_ml
-    gold = result.gold
+        total_ml = result.total_dark_ml + result.total_blue_ml + result.total_green_ml + result.total_red_ml
 
-    return {"number_of_potions": total_potions, "ml_in_barrels": ml_in_barrles, "gold": gold}
+        my_gold = connection.execute(sqlalchemy.text(gold_sql_to_execute)).scalar_one()
+
+        result_potions = connection.execute(sqlalchemy.text(potions_sql_to_execute)).first()
+
+        total_potions = result_potions.total_red + result_potions.total_green + result_potions.total_blue + result_potions.total_dark + result_potions.total_christmas + result_potions.total_purple + result_potions.total_cyan
+
+
+    return {"number_of_potions": total_potions, "ml_in_barrels": total_ml, "gold": my_gold}
 
 
 class Result(BaseModel):

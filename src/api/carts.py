@@ -117,6 +117,8 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
                 case 7:
                     num_cyan_potions -= cart_item.quantity
 
+        total_potions = num_red_potions + num_christmas_potions + num_cyan_potions + num_purple_potions + num_green_potions + num_blue_potions + num_dark_potions
+
         potion_ledger = connection.execute(
                 sqlalchemy.text("""
                                 INSERT INTO potions_ledger (red_potions, green_potions, blue_potions, dark_potions, purple_potions, christmas_potions, cyan_potions)
