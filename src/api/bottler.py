@@ -27,27 +27,57 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory]):
         num_blue_ml = sum(potion.quantity * potion.potion_type[2] for potion in potions_delivered)
         num_dark_ml = sum(potion.quantity * potion.potion_type[3] for potion in potions_delivered)
 
+        num_red_ml = num_red_ml * -1
+        num_green_ml = num_green_ml * -1
+        num_blue_ml = num_blue_ml * -1
+        num_dark_ml = num_dark_ml * -1
+
+        barrel_ledger_result = connection.execute(
+            sqlalchemy.text("""
+                            INSERT INTO barrel_ledger (red_ml_change, green_ml_change, blue_ml_change, dark_ml_change, gold_ledger_id)
+                            VALUES (:red_ml_change, :green_ml_change, :blue_ml_change, :dark_ml_change, :gold_ledger_id)
+                            RETURNING id
+                            """),
+                            {"red_ml_change": num_red_ml, "green_ml_change": num_green_ml, "blue_ml_change": num_blue_ml, "dark_ml_change": num_dark_ml}
+        )
+
+
+        # Retrieve the barrel_ledger_id generated for the new row
+        barrel_ledger_id = barrel_ledger_result.scalar()
+
+
         for potion_delivered in potions_delivered:
+            """
             connection.execute(
-                sqlalchemy.text(""" 
+                sqlalchemy.text(" 
                                 UPDATE potions
                                 SET inventory = inventory + :additional_potions
                                 WHERE potion_type = :potion_type
-                                """),
+                                "),
                 [{"additional_potions": potion_delivered.quantity,
                   "potion_type": potion_delivered.potion_type}]
             )
         
         connection.execute(
-            sqlalchemy.text("""
+            sqlalchemy.text("
                             UPDATE global_inventory SET
                             num_red_ml = num_red_ml - :num_red_ml,
                             num_green_ml = num_green_ml - :num_green_ml,
                             num_blue_ml = num_blue_ml - :num_blue_ml,
                             num_dark_ml = num_dark_ml - :num_dark_ml
-                            """),
+                            "),
             [{"num_red_ml": num_red_ml, "num_green_ml": num_green_ml, "num_blue_ml": num_blue_ml, "num_dark_ml": num_dark_ml}]
         )
+            """
+
+            # Insert a new row into barrel_ledger and connect it with the gold_ledger_id
+            connection.execute(
+                sqlalchemy.text("""
+                                INSERT INTO potions_ledger (:potion_name, barrel_ledger_id)
+                                VALUES (1, :barrel_ledger_id)
+                                """),
+                                {"potion_name": potion_delivered.sku,  "barrel_ledger_id": barrel_ledger_id}
+            )
 
         return "OK"
 
