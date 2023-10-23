@@ -64,7 +64,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
         gold_ledger_result = connection.execute(
             sqlalchemy.text("""
                             INSERT INTO gold_ledger (gold_change)
-                            VALUES :gold_change
+                            VALUES (:gold_change)
                             RETURNING id
                             """),
                            [{"gold_change": gold_change}]
