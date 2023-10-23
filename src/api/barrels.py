@@ -44,18 +44,42 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
         
     print(f"gold_paid: {gold_paid} num_red_ml: {num_red_ml} num_green_ml: {num_green_ml} num_dark_ml: {num_dark_ml}")
 
+
     with db.engine.begin() as connection:
+        """
         connection.execute(
             sqlalchemy.text(
-                """
+                "
                 UPDATE global_inventory SET
                 num_red_ml = num_red_ml + :num_red_ml,
                 num_green_ml = num_green_ml + :num_green_ml,
                 num_blue_ml = num_blue_ml + :num_blue_ml,
                 num_dark_ml = num_dark_ml + :num_dark_ml,
                 gold = gold - :gold_paid
-                """),
+                "),
                 [{"num_red_ml": num_red_ml,"num_green_ml": num_green_ml,"num_blue_ml": num_blue_ml,"num_dark_ml": num_dark_ml,"gold_paid": gold_paid}])
+        """
+
+        gold_ledger_result = connection.execute(
+            sqlalchemy.text("""
+                            INSERT INTO gold_ledger (gold_change)
+                            VALUES :gold_change
+                            RETURNING gold_ledger_id
+                            """),
+                            {"gold_change": -gold_paid}
+        )
+
+        # Retrieve the gold_ledger_id generated for the new row
+        gold_ledger_id = gold_ledger_result.scalar()
+
+        # Insert a new row into barrel_ledger and connect it with the gold_ledger_id
+        connection.execute(
+            sqlalchemy.text("""
+                            INSERT INTO barrel_ledger (red_ml_change, green_ml_change, blue_ml_change, dark_ml_change, gold_ledger_id)
+                            VALUES (:red_ml_change, :green_ml_change, :blue_ml_change, :dark_ml_change, :gold_ledger_id
+                            """),
+                            {"red_ml_change": num_red_ml, "green_ml_change": num_green_ml, "blue_ml_change": num_blue_ml, "dark_ml_change": num_dark_ml, "gold_ledger_id": gold_ledger_id}
+        )
 
     return "OK"
 
