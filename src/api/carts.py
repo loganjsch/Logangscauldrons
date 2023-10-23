@@ -124,7 +124,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
                                 RETURNING id
                                 """),
                                 {"red_potions": num_red_potions,"green_potions": num_green_potions,"blue_potions": num_blue_potions,"dark_potions": num_dark_potions,"purple_potions": num_purple_potions,"christmas_potions": num_christmas_potions,"cyan_potions": num_cyan_potions}
-            )
+            ).scalar_one()
         
         connection.execute(
             sqlalchemy.text("""
