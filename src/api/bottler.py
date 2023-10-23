@@ -45,7 +45,6 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory]):
         # Retrieve the barrel_ledger_id generated for the new row
         barrel_ledger_id = barrel_ledger_result.scalar()
 
-
         for potion_delivered in potions_delivered:
             """
             connection.execute(
@@ -69,14 +68,13 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory]):
             [{"num_red_ml": num_red_ml, "num_green_ml": num_green_ml, "num_blue_ml": num_blue_ml, "num_dark_ml": num_dark_ml}]
         )
             """
-
             # Insert a new row into barrel_ledger and connect it with the gold_ledger_id
             connection.execute(
                 sqlalchemy.text("""
                                 INSERT INTO potions_ledger (:potion_name, barrel_ledger_id)
                                 VALUES (1, :barrel_ledger_id)
                                 """),
-                                {"potion_name": potion_delivered.sku,  "barrel_ledger_id": barrel_ledger_id}
+                                {"potion_name": potion_delivered.potion_type,  "barrel_ledger_id": barrel_ledger_id}
             )
 
         return "OK"
