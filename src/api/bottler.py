@@ -21,16 +21,10 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory]):
     with db.engine.begin() as connection:
         print(potions_delivered)
 
-        additional_potions = sum(potion.quantity for potion in potions_delivered)
-        num_red_ml = sum(potion.quantity * potion.potion_type[0] for potion in potions_delivered)
-        num_green_ml = sum(potion.quantity * potion.potion_type[1] for potion in potions_delivered)
-        num_blue_ml = sum(potion.quantity * potion.potion_type[2] for potion in potions_delivered)
-        num_dark_ml = sum(potion.quantity * potion.potion_type[3] for potion in potions_delivered)
-
-        num_red_ml = num_red_ml * -1
-        num_green_ml = num_green_ml * -1
-        num_blue_ml = num_blue_ml * -1
-        num_dark_ml = num_dark_ml * -1
+        num_red_ml = sum(potion.quantity * potion.potion_type[0] for potion in potions_delivered) * -1
+        num_green_ml = sum(potion.quantity * potion.potion_type[1] for potion in potions_delivered) * -1
+        num_blue_ml = sum(potion.quantity * potion.potion_type[2] for potion in potions_delivered) * -1
+        num_dark_ml = sum(potion.quantity * potion.potion_type[3] for potion in potions_delivered) * -1
 
         barrel_ledger_result = connection.execute(
             sqlalchemy.text("""
@@ -55,19 +49,19 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory]):
         for potion_delivered in potions_delivered:
             match potion_delivered.potion_type:
                 case [100,0,0,0]:
-                    num_red_potions += 1
+                    num_red_potions += potion_delivered.quantity
                 case [0,100,0,0]:
-                    num_green_potions += 1
+                    num_green_potions += potion_delivered.quantity
                 case [0,0,100,0]:
-                    num_blue_potions += 1
+                    num_blue_potions += potion_delivered.quantity
                 case [0,0,0,100]:
-                    num_dark_potions += 1
+                    num_dark_potions += potion_delivered.quantity
                 case [50,50,0,0]:
-                    num_christmas_potions += 1
+                    num_christmas_potions += potion_delivered.quantity
                 case [50,0,50,0]:
-                    num_purple_potions += 1
+                    num_purple_potions += potion_delivered.quantity
                 case [0,50,50,0]:
-                    num_cyan_potions += 1
+                    num_cyan_potions += potion_delivered.quantity
 
         connection.execute(
                 sqlalchemy.text("""
@@ -76,6 +70,9 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory]):
                                 """),
                                 {"red_potions": num_red_potions,"green_potions": num_green_potions,"blue_potions": num_blue_potions,"dark_potions": num_dark_potions,"purple_potions": num_purple_potions,"christmas_potions": num_christmas_potions,"cyan_potions": num_cyan_potions,  "barrel_ledger_id": barrel_ledger_id}
             )
+        
+        return "OK"
+
 
         """
             connection.execute(
@@ -100,7 +97,6 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory]):
         )
             """
 
-    return "OK"
 
     """
         for potion in potions_delivered:
