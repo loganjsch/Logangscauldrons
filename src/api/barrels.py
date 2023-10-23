@@ -44,6 +44,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
         
     print(f"gold_paid: {gold_paid} num_red_ml: {num_red_ml} num_green_ml: {num_green_ml} num_dark_ml: {num_dark_ml}")
 
+    gold_change = -1 * gold_paid
 
     with db.engine.begin() as connection:
         """
@@ -66,7 +67,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
                             VALUES :gold_change
                             RETURNING gold_ledger_id
                             """),
-                            {"gold_change": -1 * gold_paid}
+                            {"gold_change": gold_change}
         )
 
         # Retrieve the gold_ledger_id generated for the new row
