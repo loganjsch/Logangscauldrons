@@ -66,7 +66,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
                             VALUES :gold_change
                             RETURNING gold_ledger_id
                             """),
-                            {"gold_change": -gold_paid}
+                            {"gold_change": -1 * gold_paid}
         )
 
         # Retrieve the gold_ledger_id generated for the new row
