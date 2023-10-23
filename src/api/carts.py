@@ -88,7 +88,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
                             JOIN potions ON potions.id = cart_items.potion_id
                             WHERE cart_id = :cart_id
                             """),
-                            [{"cart_id": cart_id}]).scalar_one()
+                            [{"cart_id": cart_id}])
 
 
         total_gold = connection.execute(
