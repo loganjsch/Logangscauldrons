@@ -13,7 +13,6 @@ api_keys = [
 api_keys.append(os.environ.get("API_KEY"))
 api_key_header = APIKeyHeader(name="access_token", auto_error=False)
 
-
 async def get_api_key(request: Request, api_key_header: str = Security(api_key_header)):
     if api_key_header in api_keys:
         request.state.is_demo = api_key_header == DEMO_KEY
