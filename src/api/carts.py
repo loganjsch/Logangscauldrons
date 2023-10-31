@@ -79,7 +79,8 @@ def search_orders(
 
         if sort_col and sort_order:
             # Add ORDER BY if both sort_col and sort_order are provided
-            query = query + sqlalchemy.text(f" ORDER BY {sort_col} {sort_order}")
+            order_by_clause = sqlalchemy.text(f" ORDER BY {sort_col} {sort_order}")
+            query = query.alias(order_by_clause)
 
         orders = connection.execute(query, {"customer_name": customer_name, "potion_sku": potion_sku})
 
@@ -106,23 +107,6 @@ def search_orders(
             "results": results,  # Include the list of results in the response
         }
 
-
-
-    """
-        return {
-            "previous": "",
-            "next": "",
-            "results": [
-                {
-                    "line_item_id": 1,
-                    "item_sku": "1 oblivion potion",
-                    "customer_name": "Scaramouche",
-                    "line_item_total": 50,
-                    "timestamp": "2021-01-01T00:00:00Z",
-                }
-            ],
-        }
-    """
 
 class NewCart(BaseModel):
     customer: str
