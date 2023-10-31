@@ -61,7 +61,6 @@ def search_orders(
     carts = sqlalchemy.Table("carts", metadata_obj, autoload_with=db.engine)
     cart_items = sqlalchemy.Table("cart_items", metadata_obj, autoload_with=db.engine)
 
-
     with db.engine.begin() as connection:
         # Build the query
         stmt = select([
@@ -71,7 +70,7 @@ def search_orders(
             cart_items.c.quantity,
             potions.c.cost,
             cart_items.c.created_at.label('timestamp')
-        ]).join(carts, cart_items.c.cart_id == carts.c.id).join(potions, cart_items.c.potion_id == potions.c.id)
+        ]).select_from(cart_items).join(carts, cart_items.c.cart_id == carts.c.id).join(potions, cart_items.c.potion_id == potions.c.id)
 
         if customer_name and potion_sku:
             stmt = stmt.where(and_(
