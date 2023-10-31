@@ -65,7 +65,7 @@ def search_orders(
                     FROM cart_items AS ci
                     JOIN carts AS c ON ci.cart_id = c.id
                     JOIN potions AS p ON ci.potion_id = p.id
-                    WHERE c.customer = :customer_name AND p.potion_sku = :potion_sku
+                    WHERE c.customer = :customer_name AND p.sku = :potion_sku
                 """),
                 {"customer_name": customer_name, "potion_sku": potion_sku}
             )
@@ -78,7 +78,7 @@ def search_orders(
                     FROM cart_items AS ci
                     JOIN carts AS c ON ci.cart_id = c.id
                     JOIN potions AS p ON ci.potion_id = p.id
-                    WHERE c.customer = :customer_name OR p.potion_sku = :potion_sku
+                    WHERE c.customer = :customer_name OR p.sku = :potion_sku
                 """),
                 {"customer_name": customer_name, "potion_sku": potion_sku}
             )
