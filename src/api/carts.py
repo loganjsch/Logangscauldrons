@@ -58,12 +58,12 @@ def search_orders(
     with db.engine.begin() as connection:
         orders = connection.execute(
             sqlalchemy.text("""
-                SELECT ci.id AS line_item_id, ci.sku AS item_sku, c.name AS customer_name,
-                    ci.quantity, p.price, ci.created_at AS timestamp
+                SELECT ci.id AS line_item_id, ci.sku AS item_sku, c.customer AS customer_name,
+                    ci.quantity, p.cost, ci.created_at AS timestamp
                 FROM cart_items AS ci
                 JOIN carts AS c ON ci.cart_id = c.id
                 JOIN potions AS p ON ci.potions_id = p.id
-                WHERE c.name = :customer_name
+                WHERE c.customer = :customer_name
             """),
             {"customer_name": customer_name}
         )
