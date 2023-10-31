@@ -93,49 +93,36 @@ def search_orders(
         # Execute the query
         results = connection.execute(stmt)
         """
-    with db.engine.begin() as connection:
-        # Calculate the offset for pagination
-        offset = (search_page - 1) * 5
-
-        # Build the query
-        stmt = select([
-            cart_items.c.id.label('line_item_id'),
-            cart_items.c.sku.label('item_sku'),
-            carts.c.customer.label('customer_name'),
-            cart_items.c.quantity,
-            potions.c.cost,
-            cart_items.c.created_at.label('timestamp')
-        ]).select_from(
-            cart_items.join(carts, cart_items.c.cart_id == carts.c.id)
-            .join(potions, cart_items.c.potion_id == potions.c.id)
-        )
-
         if customer_name and potion_sku:
-            stmt = stmt.where(and_(
-                carts.c.customer == customer_name,
-                potions.c.sku == potion_sku
-            ))
+            # If both customer_name and potion_sku are provided, search with logical AND
+            orders = connection.execute(
+                sqlalchemy.text("""
+                    SELECT ci.id AS line_item_id, ci.sku AS item_sku, c.customer AS customer_name,
+                        ci.quantity, p.cost, ci.created_at AS timestamp
+                    FROM cart_items AS ci
+                    JOIN carts AS c ON ci.cart_id = c.id
+                    JOIN potions AS p ON ci.potion_id = p.id
+                    WHERE c.customer = :customer_name AND p.sku = :potion_sku
+                """),
+                {"customer_name": customer_name, "potion_sku": potion_sku, "sort_col": sort_col}
+            )
         else:
-            stmt = stmt.where(or_(
-                carts.c.customer == customer_name,
-                potions.c.sku == potion_sku
-            ))
-
-        # Apply sorting
-        if sort_order == search_sort_order.asc:
-            stmt = stmt.order_by(asc(getattr(stmt.columns, sort_col)))
-        else:
-            stmt = stmt.order_by(desc(getattr(stmt.columns, sort_col)))
-
-        # Apply pagination
-        stmt = stmt.offset(offset).limit(5)
-
-        # Execute the query
-        results = connection.execute(stmt)
+            # If not both customer_name and potion_sku are provided, search with logical AND
+            orders = connection.execute(
+                sqlalchemy.text("""
+                    SELECT ci.id AS line_item_id, ci.sku AS item_sku, c.customer AS customer_name,
+                        ci.quantity, p.cost, ci.created_at AS timestamp
+                    FROM cart_items AS ci
+                    JOIN carts AS c ON ci.cart_id = c.id
+                    JOIN potions AS p ON ci.potion_id = p.id
+                    WHERE c.customer = :customer_name OR p.sku = :potion_sku
+                """),
+                {"customer_name": customer_name, "potion_sku": potion_sku, "sort_col": sort_col}
+            )
 
         result = []  # Initialize an empty list to store the results
 
-        for row in results:
+        for row in orders:
             # Calculate line_item_total as cost * quantity
             line_item_total = row.cost * row.quantity
 
@@ -149,17 +136,10 @@ def search_orders(
             }
             result.append(result_dict)  # Append the result to the list
 
-        # Calculate the total number of pages
-        total_pages = (results.rowcount + 5 - 1) // 5
-
-        # Calculate the previous and next pages
-        previous_page = search_page - 1 if search_page > 1 else None
-        next_page = search_page + 1 if search_page < total_pages else None
-
         # Now, 'results' contains all the retrieved rows as dictionaries
         return {
-            "previous": previous_page,
-            "next": next_page,
+            "previous": "",
+            "next": "",
             "results": result,  # Include the list of results in the response
         }
 
