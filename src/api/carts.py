@@ -62,32 +62,34 @@ def search_orders(
 
 
     with db.engine.begin() as connection:
-        if customer_name and potion_sku:
-            # If both customer_name and potion_sku are provided, search with logical AND
-            stmt = sqlalchemy.select([
-                cart_items.c.id.label('line_item_id'),
-                cart_items.c.sku.label('item_sku'),
-                carts.c.customer.label('customer_name'),
-                cart_items.c.quantity,
-                potions.c.cost,
-                cart_items.c.created_at.label('timestamp')
-            ]).select_from(
-                cart_items.join(carts, cart_items.c.cart_id == carts.c.id)
-                        .join(potions, cart_items.c.potion_id == potions.c.id)
-            )
-            if customer_name and potion_sku:
-                stmt = stmt.where(
-                    (carts.c.customer == customer_name) &
-                    (potions.c.sku == potion_sku)
-                )
-            else:
-                stmt = stmt.where(
-                (carts.c.customer == customer_name) | (potions.c.sku == potion_sku)
-            )
-            stmt = stmt.order_by(sort_col.asc()) if sort_order == "asc" else stmt.order_by(sort_col.desc())
+        # Build the query
+        stmt = sqlalchemy.select([
+            cart_items.c.id.label('line_item_id'),
+            cart_items.c.sku.label('item_sku'),
+            carts.c.customer.label('customer_name'),
+            cart_items.c.quantity,
+            potions.c.cost,
+            cart_items.c.created_at.label('timestamp')
+        ]).select_from(
+            cart_items.join(carts, cart_items.c.cart_id == carts.c.id)
+                    .join(potions, cart_items.c.potion_id == potions.c.id)
+        )
 
-            # Execute the query
-            results = connection.execute(stmt)
+        if customer_name and potion_sku:
+            stmt = stmt.where(sqlalchemy.and_(
+                carts.c.customer == customer_name,
+                potions.c.sku == potion_sku
+            ))
+        else:
+            stmt = stmt.where(sqlalchemy.or_(
+                carts.c.customer == customer_name,
+                potions.c.sku == potion_sku
+            ))
+
+        stmt = stmt.order_by(sort_col.asc()) if sort_order == "asc" else stmt.order_by(sort_col.desc())
+
+        # Execute the query
+        results = connection.execute(stmt)
         """
         else:
             stmt = sqlalchemy.select([
