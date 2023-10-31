@@ -19,8 +19,8 @@ class search_sort_options(str, Enum):
     timestamp = "timestamp"
 
 class search_sort_order(str, Enum):
-    asc = "asc"
-    desc = "desc"   
+    asc = "ASC"
+    desc = "DESC"   
 
 @router.get("/search/", tags=["search"])
 def search_orders(
@@ -66,7 +66,7 @@ def search_orders(
                     JOIN carts AS c ON ci.cart_id = c.id
                     JOIN potions AS p ON ci.potion_id = p.id
                     WHERE c.customer = :customer_name AND p.sku = :potion_sku
-                    ORDER BY :sort_col, :sort_order 
+                    ORDER BY :sort_col :sort_order 
                 """),
                 {"customer_name": customer_name, "potion_sku": potion_sku, "sort_col": sort_col, "sort_order": sort_order}
             )
@@ -80,7 +80,7 @@ def search_orders(
                     JOIN carts AS c ON ci.cart_id = c.id
                     JOIN potions AS p ON ci.potion_id = p.id
                     WHERE c.customer = :customer_name OR p.sku = :potion_sku
-                    ORDER BY :sort_col, :sort_order 
+                    ORDER BY :sort_col :sort_order 
                 """),
                 {"customer_name": customer_name, "potion_sku": potion_sku, "sort_col": sort_col, "sort_order": sort_order}
             )
