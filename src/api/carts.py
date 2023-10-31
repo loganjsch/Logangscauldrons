@@ -55,6 +55,44 @@ def search_orders(
     time is 5 total line items.
     """
 
+    with db.engine.begin() as connection:
+        orders = connection.execute(
+            sqlalchemy.text("""
+                SELECT ci.id AS line_item_id, ci.sku AS item_sku, c.name AS customer_name,
+                    ci.quantity, p.price, ci.created_at AS timestamp
+                FROM cart_items AS ci
+                JOIN carts AS c ON ci.cart_id = c.id
+                JOIN potions AS p ON ci.potions_id = p.id
+                WHERE c.name = :customer_name
+            """),
+            {"customer_name": customer_name}
+        )
+
+    results = []  # Initialize an empty list to store the results
+
+    for row in orders:
+        # Calculate line_item_total as price * quantity
+        line_item_total = row.price * row.quantity
+
+        # Create a dictionary for each row
+        result_dict = {
+            "line_item_id": row.line_item_id,
+            "item_sku": row.item_sku,
+            "customer_name": row.customer_name,
+            "line_item_total": line_item_total,
+            "timestamp": str(row.timestamp),  # Convert timestamp to a string if needed
+        }
+        results.append(result_dict)  # Append the result to the list
+
+    # Now, 'results' contains all the retrieved rows as dictionaries
+    return {
+        "previous": "",
+        "next": "",
+        "results": results,  # Include the list of results in the response
+    }
+
+
+"""
     return {
         "previous": "",
         "next": "",
@@ -68,6 +106,7 @@ def search_orders(
             }
         ],
     }
+"""
 
 class NewCart(BaseModel):
     customer: str
@@ -208,10 +247,6 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
                             SET gold = gold + :total_gold
                             "), [{"total_gold": total_gold, "cart_id": cart_id}])
         """
-
-
-
-
 
 
 """
