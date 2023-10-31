@@ -63,6 +63,7 @@ def search_orders(
 
 
     with db.engine.begin() as connection:
+        """
         # Build the query
         stmt = select([
             cart_items.c.id.label('line_item_id'),
@@ -91,10 +92,39 @@ def search_orders(
 
         # Execute the query
         results = connection.execute(stmt)
+        """
+        if customer_name and potion_sku:
+            # If both customer_name and potion_sku are provided, search with logical AND
+            orders = connection.execute(
+                sqlalchemy.text("""
+                    SELECT ci.id AS line_item_id, ci.sku AS item_sku, c.customer AS customer_name,
+                        ci.quantity, p.cost, ci.created_at AS timestamp
+                    FROM cart_items AS ci
+                    JOIN carts AS c ON ci.cart_id = c.id
+                    JOIN potions AS p ON ci.potion_id = p.id
+                    WHERE c.customer = :customer_name AND p.sku = :potion_sku
+                    ORDER BY :sort_col DESC 
+                """),
+                {"customer_name": customer_name, "potion_sku": potion_sku, "sort_col": sort_col}
+            )
+        else:
+            # If not both customer_name and potion_sku are provided, search with logical AND
+            orders = connection.execute(
+                sqlalchemy.text("""
+                    SELECT ci.id AS line_item_id, ci.sku AS item_sku, c.customer AS customer_name,
+                        ci.quantity, p.cost, ci.created_at AS timestamp
+                    FROM cart_items AS ci
+                    JOIN carts AS c ON ci.cart_id = c.id
+                    JOIN potions AS p ON ci.potion_id = p.id
+                    WHERE c.customer = :customer_name AND p.sku = :potion_sku
+                    ORDER BY :sort_col DESC 
+                """),
+                {"customer_name": customer_name, "potion_sku": potion_sku, "sort_col": sort_col}
+            )
 
         result = []  # Initialize an empty list to store the results
 
-        for row in results:
+        for row in orders:
             # Calculate line_item_total as cost * quantity
             line_item_total = row.cost * row.quantity
 
