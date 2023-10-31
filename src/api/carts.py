@@ -19,8 +19,8 @@ class search_sort_options(str, Enum):
     timestamp = "timestamp"
 
 class search_sort_order(str, Enum):
-    asc = "ASC"
-    desc = "DESC"   
+    asc = "asc"
+    desc = "desc"   
 
 @router.get("/search/", tags=["search"])
 def search_orders(
@@ -55,11 +55,56 @@ def search_orders(
     time is 5 total line items.
     """
 
+    metadata_obj = sqlalchemy.MetaData()
+    potions = sqlalchemy.Table("potions", metadata_obj, autoload_with=db.engine)
+    carts = sqlalchemy.Table("carts", metadata_obj, autoload_with=db.engine)
+    cart_items = sqlalchemy.Table("cart_item", metadata_obj, autoload_with=db.engine)
+
+
     with db.engine.begin() as connection:
         if customer_name and potion_sku:
             # If both customer_name and potion_sku are provided, search with logical AND
+            stmt = sqlalchemy.select([
+                cart_items.c.id.label('line_item_id'),
+                cart_items.c.sku.label('item_sku'),
+                carts.c.customer.label('customer_name'),
+                cart_items.c.quantity,
+                potions.c.cost,
+                cart_items.c.created_at.label('timestamp')
+            ]).select_from(
+                cart_items.join(carts, cart_items.c.cart_id == carts.c.id)
+                        .join(potions, cart_items.c.potion_id == potions.c.id)
+            ).where(
+                (carts.c.customer == customer_name) &
+                (potions.c.sku == potion_sku)
+            ).order_by(sort_col, sort_order)
+
+            # Execute the query
+            results = connection.execute(stmt)
+       
+        else:
+            stmt = sqlalchemy.select([
+                cart_items.c.id.label('line_item_id'),
+                cart_items.c.sku.label('item_sku'),
+                carts.c.customer.label('customer_name'),
+                cart_items.c.quantity,
+                potions.c.cost,
+                cart_items.c.created_at.label('timestamp')
+            ]).select_from(
+                cart_items.join(carts, cart_items.c.cart_id == carts.c.id)
+                        .join(potions, cart_items.c.potion_id == potions.c.id)
+            ).where(
+                (carts.c.customer == customer_name) | (potions.c.sku == potion_sku)
+            ).order_by(sort_col, sort_order)
+
+            # Execute the query
+            results = connection.execute(stmt)
+        
+        """
+        if customer_name and potion_sku:
+            # If both customer_name and potion_sku are provided, search with logical AND
             orders = connection.execute(
-                sqlalchemy.text("""
+                sqlalchemy.text("
                     SELECT ci.id AS line_item_id, ci.sku AS item_sku, c.customer AS customer_name,
                         ci.quantity, p.cost, ci.created_at AS timestamp
                     FROM cart_items AS ci
@@ -67,27 +112,13 @@ def search_orders(
                     JOIN potions AS p ON ci.potion_id = p.id
                     WHERE c.customer = :customer_name AND p.sku = :potion_sku
                     ORDER BY :sort_col :sort_order 
-                """),
+                "),
                 {"customer_name": customer_name, "potion_sku": potion_sku, "sort_col": sort_col, "sort_order": sort_order}
             )
-        else:
-            # If either customer_name or potion_sku is provided, search with logical OR
-            orders = connection.execute(
-                sqlalchemy.text("""
-                    SELECT ci.id AS line_item_id, ci.sku AS item_sku, c.customer AS customer_name,
-                        ci.quantity, p.cost, ci.created_at AS timestamp
-                    FROM cart_items AS ci
-                    JOIN carts AS c ON ci.cart_id = c.id
-                    JOIN potions AS p ON ci.potion_id = p.id
-                    WHERE c.customer = :customer_name OR p.sku = :potion_sku
-                    ORDER BY :sort_col :sort_order 
-                """),
-                {"customer_name": customer_name, "potion_sku": potion_sku, "sort_col": sort_col, "sort_order": sort_order}
-            )
+        """
+        result = []  # Initialize an empty list to store the results
 
-        results = []  # Initialize an empty list to store the results
-
-        for row in orders:
+        for row in results:
             # Calculate line_item_total as cost * quantity
             line_item_total = row.cost * row.quantity
 
@@ -99,13 +130,13 @@ def search_orders(
                 "line_item_total": line_item_total,
                 "timestamp": str(row.timestamp),  # Convert timestamp to a string if needed
             }
-            results.append(result_dict)  # Append the result to the list
+            result.append(result_dict)  # Append the result to the list
 
         # Now, 'results' contains all the retrieved rows as dictionaries
         return {
             "previous": "",
             "next": "",
-            "results": results,  # Include the list of results in the response
+            "results": result,  # Include the list of results in the response
         }
 
 
