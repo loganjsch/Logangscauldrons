@@ -58,28 +58,32 @@ def search_orders(
     with db.engine.begin() as connection:
         if customer_name and potion_sku:
             # If both customer_name and potion_sku are provided, search with logical AND
-            query = sqlalchemy.text(f"""
-                SELECT ci.id AS line_item_id, ci.sku AS item_sku, c.customer AS customer_name,
-                    ci.quantity, p.cost, ci.created_at AS timestamp
-                FROM cart_items AS ci
-                JOIN carts AS c ON ci.cart_id = c.id
-                JOIN potions AS p ON ci.potion_id = p.id
-                WHERE c.customer = :customer_name AND p.sku = :potion_sku
-                ORDER BY {sort_col} {sort_order}
-            """)
+            orders = connection.execute(
+                sqlalchemy.text("""
+                    SELECT ci.id AS line_item_id, ci.sku AS item_sku, c.customer AS customer_name,
+                        ci.quantity, p.cost, ci.created_at AS timestamp
+                    FROM cart_items AS ci
+                    JOIN carts AS c ON ci.cart_id = c.id
+                    JOIN potions AS p ON ci.potion_id = p.id
+                    WHERE c.customer = :customer_name AND p.sku = :potion_sku
+                    ORDER BY :sort_col, :sort_order 
+                """),
+                {"customer_name": customer_name, "potion_sku": potion_sku, "sort_col": sort_col, "sort_order": sort_order}
+            )
         else:
             # If either customer_name or potion_sku is provided, search with logical OR
-            query = sqlalchemy.text(f"""
-                SELECT ci.id AS line_item_id, ci.sku AS item_sku, c.customer AS customer_name,
-                    ci.quantity, p.cost, ci.created_at AS timestamp
-                FROM cart_items AS ci
-                JOIN carts AS c ON ci.cart_id = c.id
-                JOIN potions AS p ON ci.potion_id = p.id
-                WHERE c.customer = :customer_name OR p.sku = :potion_sku
-                ORDER BY {sort_col} {sort_order}
-            """)
-
-        orders = connection.execute(query, {"customer_name": customer_name, "potion_sku": potion_sku})
+            orders = connection.execute(
+                sqlalchemy.text("""
+                    SELECT ci.id AS line_item_id, ci.sku AS item_sku, c.customer AS customer_name,
+                        ci.quantity, p.cost, ci.created_at AS timestamp
+                    FROM cart_items AS ci
+                    JOIN carts AS c ON ci.cart_id = c.id
+                    JOIN potions AS p ON ci.potion_id = p.id
+                    WHERE c.customer = :customer_name OR p.sku = :potion_sku
+                    ORDER BY :sort_col, :sort_order 
+                """),
+                {"customer_name": customer_name, "potion_sku": potion_sku, "sort_col": sort_col, "sort_order": sort_order}
+            )
 
         results = []  # Initialize an empty list to store the results
 
@@ -97,12 +101,29 @@ def search_orders(
             }
             results.append(result_dict)  # Append the result to the list
 
-        # Now, 'results' contains all the retrieved rows as dictionaries, sorted as specified
+        # Now, 'results' contains all the retrieved rows as dictionaries
         return {
             "previous": "",
             "next": "",
             "results": results,  # Include the list of results in the response
         }
+
+
+    """
+        return {
+            "previous": "",
+            "next": "",
+            "results": [
+                {
+                    "line_item_id": 1,
+                    "item_sku": "1 oblivion potion",
+                    "customer_name": "Scaramouche",
+                    "line_item_total": 50,
+                    "timestamp": "2021-01-01T00:00:00Z",
+                }
+            ],
+        }
+    """
 
 class NewCart(BaseModel):
     customer: str
