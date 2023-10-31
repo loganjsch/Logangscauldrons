@@ -77,7 +77,8 @@ def search_orders(
             ).where(
                 (carts.c.customer == customer_name) &
                 (potions.c.sku == potion_sku)
-            ).order_by(sort_col, sort_order)
+            )
+            stmt = stmt.order_by(sort_col.asc() if sort_order == "asc" else sort_col.desc())
 
             # Execute the query
             results = connection.execute(stmt)
@@ -95,7 +96,8 @@ def search_orders(
                         .join(potions, cart_items.c.potion_id == potions.c.id)
             ).where(
                 (carts.c.customer == customer_name) | (potions.c.sku == potion_sku)
-            ).order_by(sort_col, sort_order)
+            )
+            stmt = stmt.order_by(sort_col.asc() if sort_order == "asc" else sort_col.desc())
 
             # Execute the query
             results = connection.execute(stmt)
