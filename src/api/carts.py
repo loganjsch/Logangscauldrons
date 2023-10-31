@@ -62,7 +62,7 @@ def search_orders(
                     ci.quantity, p.cost, ci.created_at AS timestamp
                 FROM cart_items AS ci
                 JOIN carts AS c ON ci.cart_id = c.id
-                JOIN potions AS p ON ci.potions_id = p.id
+                JOIN potions AS p ON ci.potion_id = p.id
                 WHERE c.customer = :customer_name
             """),
             {"customer_name": customer_name}
