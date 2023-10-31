@@ -4,6 +4,7 @@ from src.api import auth
 import sqlalchemy
 from src import database as db
 from enum import Enum
+from sqlalchemy import *
 
 
 router = APIRouter(
@@ -63,7 +64,7 @@ def search_orders(
 
     with db.engine.begin() as connection:
         # Build the query
-        stmt = sqlalchemy.select([
+        stmt = select([
             cart_items.c.id.label('line_item_id'),
             cart_items.c.sku.label('item_sku'),
             carts.c.customer.label('customer_name'),
@@ -76,12 +77,12 @@ def search_orders(
         )
 
         if customer_name and potion_sku:
-            stmt = stmt.where(sqlalchemy.and_(
+            stmt = stmt.where(and_(
                 carts.c.customer == customer_name,
                 potions.c.sku == potion_sku
             ))
         else:
-            stmt = stmt.where(sqlalchemy.or_(
+            stmt = stmt.where(or_(
                 carts.c.customer == customer_name,
                 potions.c.sku == potion_sku
             ))
@@ -90,6 +91,30 @@ def search_orders(
 
         # Execute the query
         results = connection.execute(stmt)
+
+        result = []  # Initialize an empty list to store the results
+
+        for row in results:
+            # Calculate line_item_total as cost * quantity
+            line_item_total = row.cost * row.quantity
+
+            # Create a dictionary for each row
+            result_dict = {
+                "line_item_id": row.line_item_id,
+                "item_sku": row.item_sku,
+                "customer_name": row.customer_name,
+                "line_item_total": line_item_total,
+                "timestamp": str(row.timestamp),  # Convert timestamp to a string if needed
+            }
+            result.append(result_dict)  # Append the result to the list
+
+        # Now, 'results' contains all the retrieved rows as dictionaries
+        return {
+            "previous": "",
+            "next": "",
+            "results": result,  # Include the list of results in the response
+        }
+
         """
         else:
             stmt = sqlalchemy.select([
@@ -124,28 +149,6 @@ def search_orders(
                 {"customer_name": customer_name, "potion_sku": potion_sku, "sort_col": sort_col, "sort_order": sort_order}
             )
         """
-        result = []  # Initialize an empty list to store the results
-
-        for row in results:
-            # Calculate line_item_total as cost * quantity
-            line_item_total = row.cost * row.quantity
-
-            # Create a dictionary for each row
-            result_dict = {
-                "line_item_id": row.line_item_id,
-                "item_sku": row.item_sku,
-                "customer_name": row.customer_name,
-                "line_item_total": line_item_total,
-                "timestamp": str(row.timestamp),  # Convert timestamp to a string if needed
-            }
-            result.append(result_dict)  # Append the result to the list
-
-        # Now, 'results' contains all the retrieved rows as dictionaries
-        return {
-            "previous": "",
-            "next": "",
-            "results": result,  # Include the list of results in the response
-        }
 
 
     """
