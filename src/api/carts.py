@@ -72,7 +72,7 @@ def search_orders(
 
     for row in orders:
         # Calculate line_item_total as price * quantity
-        line_item_total = row.price * row.quantity
+        line_item_total = row.cost * row.quantity
 
         # Create a dictionary for each row
         result_dict = {
