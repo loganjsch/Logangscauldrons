@@ -79,10 +79,6 @@ def search_orders(
                 ORDER BY {sort_col} {sort_order}
             """)
 
-        if sort_col and sort_order:
-            # Add ORDER BY if both sort_col and sort_order are provided
-            query = query + sqlalchemy.text(f" ORDER BY {sort_col} {sort_order}")
-
         orders = connection.execute(query, {"customer_name": customer_name, "potion_sku": potion_sku})
 
         results = []  # Initialize an empty list to store the results
