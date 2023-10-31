@@ -87,7 +87,7 @@ def search_orders(
                 potions.c.sku == potion_sku
             ))
 
-        stmt = stmt.order_by(sort_col.asc()) if sort_order == "asc" else stmt.order_by(sort_col.desc())
+        # stmt = stmt.order_by(sort_col.asc()) if sort_order == "asc" else stmt.order_by(sort_col.desc())
 
         # Execute the query
         results = connection.execute(stmt)
