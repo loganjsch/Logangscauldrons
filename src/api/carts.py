@@ -58,7 +58,7 @@ def search_orders(
     metadata_obj = sqlalchemy.MetaData()
     potions = sqlalchemy.Table("potions", metadata_obj, autoload_with=db.engine)
     carts = sqlalchemy.Table("carts", metadata_obj, autoload_with=db.engine)
-    cart_items = sqlalchemy.Table("cart_item", metadata_obj, autoload_with=db.engine)
+    cart_items = sqlalchemy.Table("cart_items", metadata_obj, autoload_with=db.engine)
 
 
     with db.engine.begin() as connection:
