@@ -56,57 +56,72 @@ def search_orders(
     """
 
     with db.engine.begin() as connection:
-        orders = connection.execute(
-            sqlalchemy.text("""
-                SELECT ci.id AS line_item_id, ci.sku AS item_sku, c.customer AS customer_name,
-                    ci.quantity, p.cost, ci.created_at AS timestamp
-                FROM cart_items AS ci
-                JOIN carts AS c ON ci.cart_id = c.id
-                JOIN potions AS p ON ci.potion_id = p.id
-                WHERE c.customer = :customer_name
-            """),
-            {"customer_name": customer_name}
-        )
+        if customer_name and potion_sku:
+            # If both customer_name and potion_sku are provided, search with logical AND
+            orders = connection.execute(
+                sqlalchemy.text("""
+                    SELECT ci.id AS line_item_id, ci.sku AS item_sku, c.customer AS customer_name,
+                        ci.quantity, p.cost, ci.created_at AS timestamp
+                    FROM cart_items AS ci
+                    JOIN carts AS c ON ci.cart_id = c.id
+                    JOIN potions AS p ON ci.potion_id = p.id
+                    WHERE c.customer = :customer_name AND p.potion_sku = :potion_sku
+                """),
+                {"customer_name": customer_name, "potion_sku": potion_sku}
+            )
+        else:
+            # If either customer_name or potion_sku is provided, search with logical OR
+            orders = connection.execute(
+                sqlalchemy.text("""
+                    SELECT ci.id AS line_item_id, ci.sku AS item_sku, c.customer AS customer_name,
+                        ci.quantity, p.cost, ci.created_at AS timestamp
+                    FROM cart_items AS ci
+                    JOIN carts AS c ON ci.cart_id = c.id
+                    JOIN potions AS p ON ci.potion_id = p.id
+                    WHERE c.customer = :customer_name OR p.potion_sku = :potion_sku
+                """),
+                {"customer_name": customer_name, "potion_sku": potion_sku}
+            )
 
-    results = []  # Initialize an empty list to store the results
+        results = []  # Initialize an empty list to store the results
 
-    for row in orders:
-        # Calculate line_item_total as price * quantity
-        line_item_total = row.cost * row.quantity
+        for row in orders:
+            # Calculate line_item_total as cost * quantity
+            line_item_total = row.cost * row.quantity
 
-        # Create a dictionary for each row
-        result_dict = {
-            "line_item_id": row.line_item_id,
-            "item_sku": row.item_sku,
-            "customer_name": row.customer_name,
-            "line_item_total": line_item_total,
-            "timestamp": str(row.timestamp),  # Convert timestamp to a string if needed
-        }
-        results.append(result_dict)  # Append the result to the list
-
-    # Now, 'results' contains all the retrieved rows as dictionaries
-    return {
-        "previous": "",
-        "next": "",
-        "results": results,  # Include the list of results in the response
-    }
-
-
-"""
-    return {
-        "previous": "",
-        "next": "",
-        "results": [
-            {
-                "line_item_id": 1,
-                "item_sku": "1 oblivion potion",
-                "customer_name": "Scaramouche",
-                "line_item_total": 50,
-                "timestamp": "2021-01-01T00:00:00Z",
+            # Create a dictionary for each row
+            result_dict = {
+                "line_item_id": row.line_item_id,
+                "item_sku": row.item_sku,
+                "customer_name": row.customer_name,
+                "line_item_total": line_item_total,
+                "timestamp": str(row.timestamp),  # Convert timestamp to a string if needed
             }
-        ],
-    }
-"""
+            results.append(result_dict)  # Append the result to the list
+
+        # Now, 'results' contains all the retrieved rows as dictionaries
+        return {
+            "previous": "",
+            "next": "",
+            "results": results,  # Include the list of results in the response
+        }
+
+
+    """
+        return {
+            "previous": "",
+            "next": "",
+            "results": [
+                {
+                    "line_item_id": 1,
+                    "item_sku": "1 oblivion potion",
+                    "customer_name": "Scaramouche",
+                    "line_item_total": 50,
+                    "timestamp": "2021-01-01T00:00:00Z",
+                }
+            ],
+        }
+    """
 
 class NewCart(BaseModel):
     customer: str
