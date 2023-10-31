@@ -65,6 +65,7 @@ def search_orders(
                 JOIN carts AS c ON ci.cart_id = c.id
                 JOIN potions AS p ON ci.potion_id = p.id
                 WHERE c.customer = :customer_name AND p.sku = :potion_sku
+                ORDER BY {sort_col} {sort_order}
             """)
         else:
             # If either customer_name or potion_sku is provided, search with logical OR
@@ -75,12 +76,12 @@ def search_orders(
                 JOIN carts AS c ON ci.cart_id = c.id
                 JOIN potions AS p ON ci.potion_id = p.id
                 WHERE c.customer = :customer_name OR p.sku = :potion_sku
+                ORDER BY {sort_col} {sort_order}
             """)
 
         if sort_col and sort_order:
             # Add ORDER BY if both sort_col and sort_order are provided
-            order_by_clause = sqlalchemy.text(f" ORDER BY {sort_col} {sort_order}")
-            query = query.alias(order_by_clause)
+            query = query + sqlalchemy.text(f" ORDER BY {sort_col} {sort_order}")
 
         orders = connection.execute(query, {"customer_name": customer_name, "potion_sku": potion_sku})
 
@@ -106,7 +107,6 @@ def search_orders(
             "next": "",
             "results": results,  # Include the list of results in the response
         }
-
 
 class NewCart(BaseModel):
     customer: str
