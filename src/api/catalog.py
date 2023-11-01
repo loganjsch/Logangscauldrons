@@ -41,7 +41,7 @@ def get_catalog():
             if value > 0:
                 potion_res = connection.execute(sqlalchemy.text("""
                                                 SELECT FROM potions WHERE sku = :sku
-                                                """), {"sku": key,})
+                                                """), {"sku": key,}).first()
                 catalog.append(
                     {
                     "sku": key,
