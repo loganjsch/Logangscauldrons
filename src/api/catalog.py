@@ -40,8 +40,8 @@ def get_catalog():
         for key, value in potions_dict.items():
             if value > 0:
                 potion_res = connection.execute(sqlalchemy.text("""
-                                                SELECT FROM potions WHERE sku = :sku
-                                                """), {"sku": key,}).first()
+                                                SELECT cost, potion_type FROM potions WHERE sku = :sku
+                                                """), {"sku": key}).first()
                 catalog.append(
                     {
                     "sku": key,
