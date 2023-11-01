@@ -64,13 +64,13 @@ def search_orders(
     with db.engine.begin() as connection:
         # Build the query
         stmt = select([
-            cart_items.c.id.label('line_item_id'),
-            cart_items.c.sku.label('item_sku'),
-            carts.c.customer.label('customer_name'),
+            cart_items.c.id,
+            cart_items.c.sku,
+            carts.c.customer,
             cart_items.c.quantity,
             potions.c.cost,
-            cart_items.c.created_at.label('timestamp')
-        ]).select_from(cart_items).join(carts, cart_items.c.cart_id == carts.c.id).join(potions, cart_items.c.potion_id == potions.c.id)
+            cart_items.c.created_at
+        ]).join(carts, cart_items.c.cart_id == carts.c.id).join(potions, cart_items.c.potion_id == potions.c.id)
 
         if customer_name and potion_sku:
             stmt = stmt.where(and_(
@@ -96,11 +96,11 @@ def search_orders(
 
             # Create a dictionary for each row
             result_dict = {
-                "line_item_id": row.line_item_id,
-                "item_sku": row.item_sku,
-                "customer_name": row.customer_name,
+                "line_item_id": row.id,
+                "item_sku": row.sku,
+                "customer_name": row.customer,
                 "line_item_total": line_item_total,
-                "timestamp": str(row.timestamp),  # Convert timestamp to a string if needed
+                "timestamp": str(row.created_at),  # Convert timestamp to a string if needed
             }
             result.append(result_dict)  # Append the result to the list
 
