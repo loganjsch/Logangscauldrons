@@ -35,7 +35,6 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory]):
                             {"red_ml_change": num_red_ml, "green_ml_change": num_green_ml, "blue_ml_change": num_blue_ml, "dark_ml_change": num_dark_ml}
         )
 
-
         # Retrieve the barrel_ledger_id generated for the new row
         barrel_ledger_id = barrel_ledger_result.scalar()
         num_red_potions = 0
