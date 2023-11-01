@@ -12,24 +12,46 @@ def get_catalog():
 
     # Can return a max of 20 items.
 
-    sql_to_execute = "SELECT * FROM potions"
+    sql_to_execute ="""
+                    SELECT SUM(green_potions) as green_potions, 
+                        SUM(purple_potions) as purple_potions, 
+                        SUM(christmas_potions) as christmas_potions, 
+                        SUM(blue_potions) as blue_potions, 
+                        SUM(red_potions) as red_potions, 
+                        SUM(cyan_potions) as cyan_potions,
+                        SUM(dark_potions) as dark_potions
+                    FROM potions_ledger;
+                    """
 
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text(sql_to_execute))
+        result = connection.execute(sqlalchemy.text(sql_to_execute)).first()
 
-    catalog = []
-    for row in result:
-        if row.inventory > 0:
-            catalog.append(
-                {
-                "sku": row.sku,
-                "name": row.sku,
-                "quantity": row.inventory,
-                "price": row.cost,
-                "potion_type": row.potion_type,
-            })
+        potions_dict = {}
 
-    return catalog
+        potions_dict["green_potion_0"] = result.green_potions
+        potions_dict["red_potion_0"] = result.red_potions
+        potions_dict["blue_potion_0"] = result.blue_potions
+        potions_dict["dark_potion_0"] = result.dark_potions
+        potions_dict["purple_potion_0"] = result.purple_potions
+        potions_dict["christmas_potion"] = result.christmas_potions
+        potions_dict["cyan_potion"] = result.cyan_potions
+
+        catalog = []
+        for key, value in potions_dict.items():
+            if value > 0:
+                potion_res = connection.execute(sqlalchemy.text("""
+                                                SELECT FROM potions WHERE sku = :sku
+                                                """), {"sku": key,})
+                catalog.append(
+                    {
+                    "sku": key,
+                    "name": key,
+                    "quantity": value,
+                    "price": potion_res.cost,
+                    "potion_type": potion_res.potion_type,
+                })
+
+        return catalog
 
     """
 
