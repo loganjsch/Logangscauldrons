@@ -267,19 +267,19 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
         for cart_item in cart:
             match cart_item.potion_id:
                 case 1:
-                    num_christmas_potions += cart_item.quantity
+                    num_christmas_potions -= cart_item.quantity
                 case 2:
-                    num_red_potions += cart_item.quantity
+                    num_red_potions -= cart_item.quantity
                 case 3:
-                    num_blue_potions += cart_item.quantity
+                    num_blue_potions -= cart_item.quantity
                 case 4:
-                    num_dark_potions += cart_item.quantity
+                    num_dark_potions -= cart_item.quantity
                 case 5:
-                    num_green_potions += cart_item.quantity
+                    num_green_potions -= cart_item.quantity
                 case 6:
-                    num_purple_potions += cart_item.quantity
+                    num_purple_potions -= cart_item.quantity
                 case 7:
-                    num_cyan_potions += cart_item.quantity
+                    num_cyan_potions -= cart_item.quantity
 
         total_potions = num_red_potions + num_christmas_potions + num_cyan_potions + num_purple_potions + num_green_potions + num_blue_potions + num_dark_potions
 
