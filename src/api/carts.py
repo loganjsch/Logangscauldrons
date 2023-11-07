@@ -281,7 +281,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
                 case 7:
                     num_cyan_potions -= cart_item.quantity
 
-        total_potions = num_red_potions + num_christmas_potions + num_cyan_potions + num_purple_potions + num_green_potions + num_blue_potions + num_dark_potions
+        total_potions = -1 * (num_red_potions + num_christmas_potions + num_cyan_potions + num_purple_potions + num_green_potions + num_blue_potions + num_dark_potions)
 
         potion_ledger = connection.execute(
                 sqlalchemy.text("""
