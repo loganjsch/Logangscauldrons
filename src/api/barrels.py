@@ -139,17 +139,19 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 #num_dark_barrel_buy += 1
                 barrel_dict[barrel.sku] += 1
                 my_gold = my_gold - barrel.price
-        if barrel.potion_type == [1, 0, 0, 0]:
-            if (my_gold > barrel.price) & (total_red_ml < 1000):
-                #num_blue_barrel_buy += 1
-                barrel_dict[barrel.sku] += 1
-                my_gold = my_gold - barrel.price
         if barrel.potion_type == [0, 0, 1, 0]:
             if (my_gold > barrel.price) & (total_blue_ml < 1000):
                 #num_blue_barrel_buy += 1
                 barrel_dict[barrel.sku] += 1
                 my_gold = my_gold - barrel.price
+        """
         if barrel.potion_type == [1, 0, 0, 0]:
+            if (my_gold > barrel.price) & (total_red_ml < 1000):
+                #num_blue_barrel_buy += 1
+                barrel_dict[barrel.sku] += 1
+                my_gold = my_gold - barrel.price
+        """
+        if barrel.potion_type == [0, 0, 0, 1]:
             if (my_gold > barrel.price) & (total_dark_ml < 1000):
                 #num_dark_barrel_buy += 1
                 barrel_dict[barrel.sku] += 1
