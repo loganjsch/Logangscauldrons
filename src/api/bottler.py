@@ -139,8 +139,22 @@ def get_bottle_plan():
                     FROM barrel_ledger;
                     """
 
+    potions_sql_to_execute="""
+                            SELECT SUM(red_potions) as total_red, 
+                                SUM(green_potions) as total_green, 
+                                SUM(blue_potions) as total_blue, 
+                                SUM(dark_potions) as total_dark,
+                                SUM(christmas_potions) as total_christmas, 
+                                SUM(purple_potions) as total_purple, 
+                                SUM(cyan_potions) as total_cyan
+                            FROM potions_ledger;
+                            """
+
     with db.engine.begin() as connection:
         result = connection.execute(sqlalchemy.text(sql_to_execute)).first()
+        result_potions = connection.execute(sqlalchemy.text(potions_sql_to_execute)).first()
+        total_potion_count = result_potions.total_red + result_potions.total_green + result_potions.total_blue + result_potions.total_dark + result_potions.total_christmas + result_potions.total_purple + result_potions.total_cyan
+
 
         total_red_ml = result.total_red_ml
         total_green_ml = result.total_green_ml
@@ -164,14 +178,18 @@ def get_bottle_plan():
             potion_dic[type_tuple] = 0
             while ((total_red_ml >= row.potion_type[0]) and (total_green_ml >= row.potion_type[1]) 
             and (total_blue_ml >= row.potion_type[2]) and (total_dark_ml >= row.potion_type[3]) 
-            and ((row.inventory + potion_dic[type_tuple]) < 100)):
+            and ((row.inventory + potion_dic[type_tuple]) < 100)) and (total_potion_count < 300):
                 potion_dic[type_tuple] += 1
+                total_potion_count += 1
 
                 # keep local counts up to date
                 total_red_ml = total_red_ml - row.potion_type[0]
                 total_green_ml = total_green_ml - row.potion_type[1]
                 total_blue_ml = total_blue_ml - row.potion_type[2]
                 total_dark_ml = total_dark_ml - row.potion_type[3]
+
+            if total_potion_count >= 300:
+                break
 
         for key, value in potion_dic.items():
             if value > 0:
